@@ -28,6 +28,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 - [x] Need to make migrations before running any tests, e.g. `delete_dashboard_then_create_empty.py`
 - [x] A simple test passes
 - [x] Create favicon
+- [ ] Get running under Apache
 - [ ] Create mock Adobe endpoint
 - [ ] Generate WSSE header
 - [ ] Parse Adobe response
