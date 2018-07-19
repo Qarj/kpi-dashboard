@@ -12,3 +12,18 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 
 ## Later features wish list
 - Update and display KPI on a hourly basis
+
+## Tasks - MVP
+-[ ] Create new Django project kpi
+-[ ] Fix WSGI.py
+-[ ] Create dash schema (username, secret, request url, request body, report_last_days, kpi_name)
+-[ ] Create kpi schema (date, value)
+-[ ] Generate WSSE header
+-[ ] Create mock Adobe endpoint
+-[ ] Parse Adobe response
+-[ ] Put response in DB
+-[ ] Determine missing data and request in loop
+
+## Tasks - Later
+-[ ] graph previous period - week
+-[ ] graph previous period - year
