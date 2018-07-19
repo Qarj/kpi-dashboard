@@ -14,15 +14,25 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 - Update and display KPI on a hourly basis
 
 ## Tasks - MVP
--[ ] Create new Django project kpi
--[ ] Fix WSGI.py
--[ ] Create dash schema (username, secret, request url, request body, report_last_days, kpi_name)
--[ ] Create kpi schema (date, value)
--[ ] Generate WSSE header
--[ ] Create mock Adobe endpoint
--[ ] Parse Adobe response
--[ ] Put response in DB
--[ ] Determine missing data and request in loop
+- [x] Create new Django project kpi `django-admin startproject kpi & cd kpi & python manage.py runserver`
+- [x] Create new app `python manage.py startapp summary`
+- [x] Add app to `kpi/settings.py`: `'summary.apps.SummaryConfig',`
+- [x] In settings.py fix Timezone `TIME_ZONE = 'UTC'`
+- [x] In settings.py set static url `STATIC_URL = '/kpi-static/'`
+- [x] Fix WSGI.py `os.environ['DJANGO_SETTINGS_MODULE'] = 'kpi.settings'`
+- [x] in `kpi/urls.py` add include `from django.urls import include, path` and url pattern `path('summary/', include('summary.urls')),`
+- [x] create `summary/urls.py`
+- [x] .gitignore
+- [x] Create dash schema - username, secret, request url, request body, report_last_days, kpi_name
+- [x] Create kpi schema - date, value
+- [x] Need to make migrations before running any tests, e.g. `delete_dashboard_then_create_empty.py`
+- [x] A simple test passes
+- [ ] Create favicon
+- [ ] Create mock Adobe endpoint
+- [ ] Generate WSSE header
+- [ ] Parse Adobe response
+- [ ] Put response in DB
+- [ ] Determine missing data and request in loop
 
 ## Tasks - Later
 -[ ] graph previous period - week

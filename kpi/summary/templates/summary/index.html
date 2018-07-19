@@ -1,0 +1,14 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+
+{% if error %}
+    <h4>{{error}}</h4>
+{% else %}
+    <h1>{{ page_heading }}</h1>
+    <h2>View some KPIs</h2>
+    <h4><a href="table/visits" class="normal">http://localhost/kpi/summary/table/visits</a></h4>
+
+{% endif %}
+
+{% endblock %}

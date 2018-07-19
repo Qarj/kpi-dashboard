@@ -1,0 +1,153 @@
+@import 'https://fonts.googleapis.com/css?family=Ubuntu'
+@import 'https://fonts.googleapis.com/css?family=Source+Code+Pro'
+
+* {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Ubuntu', sans-serif;
+	line-height: 1.25em;
+	font-size: 16px;
+	background-color: #222;
+	color: #aaa;
+}
+
+p {
+	font-size: 16px;
+}
+
+pre {
+    font-family: 'Source Code Pro', monospace;
+}
+
+h1 {
+	font-size: 30px;
+	line-height: 34px;
+}
+
+h2 {
+	font-size: 20px;
+	line-height: 25px;
+}
+
+h3 {
+	font-size: 16px;
+	line-height: 27px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid #D8D8D8;
+	border-top: 1px solid #D8D8D8;
+}
+
+hr {
+	height: 1px;
+	background-color: #d8d8d8;
+	border: none;
+	width: 100%;
+	margin: 0px;
+}
+
+a[href]:hover {
+	color: #3ba0e6;
+}
+
+img {
+	max-width: 100%;
+}
+
+li {
+	line-height: 1.5em;
+}
+
+@media (min-width: 1921px) {
+	body {
+		font-size: 18px;
+	}
+}
+
+a:hover, a:visited, a:link, a:active
+{
+    text-decoration: none;
+}
+
+/* border-spacing: horizontal_padding vertical_padding */
+
+/*
+  vertical-align: text-top; 
+  border-collapse: separate;
+*/
+
+table {
+  border-spacing: 14px 2px;
+}
+
+.normal { color: #1e8ad6; }
+.pass { color:#5BAB03; font-weight:bold; }
+.fail { color:#FF5940; font-weight:bold; }
+.pend { color:#89DDFF; font-weight:bold; }
+.error { color:#F4E542; font-weight:bold; }
+
+.steps {
+    background-color:#AAA;
+    font-family: 'Source Code Pro', monospace;
+} 
+
+.bold {
+	font-size: 19px;
+	color: #CB8421;
+}
+
+.boldfail {
+	font-size: 19px;
+	color:#FF5940; font-weight:bold;
+}
+
+.boldpass {
+	font-size: 19px;
+	color:#5BAB03; font-weight:bold;
+}
+
+.boldpend {
+	font-size: 19px;
+	color:#89DDFF; font-weight:bold;
+}
+
+/*tr { vertical-align: text-top; } */
+
+.submit-button {
+ 	font-family: 'Ubuntu', sans-serif;
+ 	font-weight:bold;
+    background: #016ABC;
+    color: #aaa;
+    border: 3px solid #eee;
+    border-color: #aaa;
+    border-radius: 5px;
+    text-shadow:none;
+	font-size: 20px;
+	line-height: 25px;
+}
+
+.submit-button:hover {
+	font-family: 'Ubuntu', sans-serif;
+ 	font-weight:bold;
+    background: #aaa;
+    color: #016ABC;
+    border: 5px solid #eee;
+    border-color: #aaa;
+    border-radius: 5px;
+    text-shadow:none;
+	font-size: 20px;
+	line-height: 25px;
+}
+
+.row {
+    display: flex;
+}
+
+/* Create two equal columns that sits next to each other */
+.column {
+    flex: 50%;
+    padding: 10px;
+}
