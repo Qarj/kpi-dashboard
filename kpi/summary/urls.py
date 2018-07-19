@@ -8,6 +8,9 @@ urlpatterns = [
     # ex: /kpi/summary/
     path('', views.index, name='index'),
 
+    # ex: /kpi/summary/adobe/
+    path('adobe/', views.adobe, name='adobe'),
+
     # ex: /kpi/summary/table/
 #    path('table/', views.table, name='table'),
 

@@ -17,3 +17,16 @@ def index(request):
     }
 
     return render(request, 'summary/index.html', context)
+
+def adobe(request):
+    page_title = "Fake Adobe"
+    page_heading = "Fake Adobe KPI endpoint"
+    error = ''
+
+    context = {
+        'page_title': page_title,
+        'page_heading': page_heading,
+        'error': error,
+    }
+
+    return render(request, 'summary/adobe.html', context)

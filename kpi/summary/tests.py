@@ -31,7 +31,7 @@ class KPIIndexViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'KPI Dashboard')
     
-# class KPISummaryTests(TestCase):
+class KPISummaryTests(TestCase):
 
     #
     # test helpers
@@ -92,9 +92,24 @@ class KPIIndexViewTests(TestCase):
     # def _assertNotRegex(self, response, regex):
         # self.assertNotRegex(response.content.decode('utf-8'), regex)
 
+    def test_fake_adobe_returns_message_on_GET(self):
+        response = self.client.get(reverse('summary:adobe'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Fake Adobe KPI endpoint')
+        
+        
 # Tests
 # MVP
 # - Fake Adobe Endpoint
 #   - Endpoint returns 'You must post to this endpoint' on GET
 #   - Checks for WSSE header
 #   - Returns KPI data
+# - Create/Edit dashboard
+#   - GET kpi/summary/edit/site_visits will display the current fields for dashboard named site_visits, or blank if empty
+#   - POST kpi/summary/edit/site_visits will update the fields to the database
+# - Display dashboard as table
+#   - GET kpi/summary/table/site_visits will display the kpi raw data for the report period
+#   - will get missing data before display
+# - Display dashboard as graph
+#   - GET kpi/summary/table/site_visits will graph the kpi for the report period
+#   - will get missing data before display
