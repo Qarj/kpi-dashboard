@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+import random, json
 
 def index(request):
     page_title = "KPI Dashboard"
@@ -30,3 +32,15 @@ def adobe(request):
     }
 
     return render(request, 'summary/adobe.html', context)
+
+@csrf_exempt
+def adobe_fake_api(request):
+    if request.method != 'POST':
+        return HttpResponse('Must be a post request')
+
+    api_request = json.loads(request.body.decode("utf-8"))
+    target_date = api_request['reportDescription']['date']
+
+    random.seed(target_date)
+
+    return HttpResponse('"visits":"' + str(random.randrange(100_000, 250_000)) + '"')

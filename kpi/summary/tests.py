@@ -3,6 +3,8 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.http import urlencode
+from datetime import date, timedelta
+import json
 
 #
 # Test Helpers
@@ -21,6 +23,27 @@ def my_reverse(viewname, kwargs=None, query_kwargs=None):
         return u'%s?%s' % (url, urlencode(query_kwargs))
 
     return url
+
+def kpi_date(offset):
+    desired_date = date.today() + timedelta(offset)
+    return desired_date.strftime("%Y-%m-%d")
+
+#target_date = '9999-99-99'
+    
+def build_visits_body(target_date):
+    return \
+{
+    "reportDescription":{
+        "reportSuiteID":"my_brand",
+        "date":target_date,
+        "dateGranularity":"day",
+        "metrics":[
+            {
+                "id":"visits"
+            }
+        ]
+    }
+}
 
 class KPIIndexViewTests(TestCase):
     def test_index(self):
@@ -53,19 +76,15 @@ class KPISummaryTests(TestCase):
         # url = my_reverse('server:canary')
         # return self._get_url( url, debug )
 
-    # def submit(self, steps, debug=False, batch='', target='', name=''):
-        # body = {'steps': steps}
-        # return self._post_url_and_body( self._build_submit_url(batch, target, name), body, debug )
+    def adobe_fake_api(self, body, debug=False, method=''):
+        my_date = '8888-88-88'
+        return self._post_url_and_body( self._build_adobe_fake_api_url(method), body, debug )
 
-    # def _build_submit_url(self, batch, target, name):
-        # kwargs={}
-        # if (batch):
-            # kwargs['batch'] = batch
-        # if (target):
-            # kwargs['target'] = target
-        # if (name):
-            # kwargs['name'] = name
-        # return my_reverse('server:submit', query_kwargs=kwargs)
+    def _build_adobe_fake_api_url(self, method):
+        kwargs={}
+        if (method):
+            kwargs['method'] = method
+        return my_reverse('summary:adobe_fake_api', query_kwargs=kwargs)
 
     # def _get_url(self, url, debug=False):
         # response = self.client.get(url)
@@ -74,28 +93,39 @@ class KPISummaryTests(TestCase):
             # print(response.content.decode('utf-8'), '\n')
         # return response
 
-    # def _post_url_and_body(self, url, body, debug=False):
-        # response = self.client.post(url, body)
-        # if (debug):
-            # print('\nDebug URL :', url)
-            # print('\nDebug Body:', body)
-            # print('\nDebug Response Content Start\n', response.content.decode('utf-8'), '\n')
-            # print('\nDebug Response Content End\n')
-        # return response
+    def _post_url_and_body(self, url, body, debug=False):
+#        response = self.client.post(url, json.dumps(body), format='json')
+        response = self.client.generic('POST', url, json.dumps(body))
+        if (debug):
+            print('\nDebug URL :', url)
+            print('\nDebug Body:', body)
+            print('\nDebug Response Content Start\n', response.content.decode('utf-8'), '\n')
+            print('\nDebug Response Content End\n')
+        return response
 
-    # def number_of_instances(self, response, target):
-        # return response.content.decode('utf-8').count(target)
+    def _assertRegex(self, response, regex):
+        self.assertRegex(response.content.decode('utf-8'), regex)
 
-    # def _assertRegex(self, response, regex):
-        # self.assertRegex(response.content.decode('utf-8'), regex)
+    def _assertNotRegex(self, response, regex):
+        self.assertNotRegex(response.content.decode('utf-8'), regex)
 
-    # def _assertNotRegex(self, response, regex):
-        # self.assertNotRegex(response.content.decode('utf-8'), regex)
-
-    def test_fake_adobe_returns_message_on_GET(self):
+    def test_adobe_fake_api_info_page_exists(self):
         response = self.client.get(reverse('summary:adobe'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Fake Adobe KPI endpoint')
+
+    def test_adobe_fake_api_returns_JSON_on_POST(self):
+        response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=False)
+        self._assertRegex(response, r'"visits":"\d+"')
+
+    def test_adobe_fake_api_returns_message_on_GET(self):
+        response = self.client.get(reverse('summary:adobe_fake_api'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Must be a post request')
+
+    def test_adobe_fake_api_returns_random_visits_greater_than_100k(self):
+        response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=True)
+        self._assertRegex(response, r'"visits":"\d{5,}"')
         
         
 # Tests
