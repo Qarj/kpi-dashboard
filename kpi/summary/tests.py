@@ -69,10 +69,16 @@ class KPISummaryTests(TestCase):
         # url = my_reverse('server:run', query_kwargs=kwargs)
         # return self._get_url(url, debug)
 
-    # def get_submit(self, debug=False, batch='', target='', name=''):
-        # return self._get_url( self._build_submit_url(batch, target, name), debug )
+    def get_edit(self, debug=False, kpi='unknown'):
+        return self._get_url( self._build_edit_url(kpi), debug )
 
-    # def canary(self, debug=False):
+    def _build_edit_url(self, kpi):
+        kwargs={}
+        kwargs['kpi'] = kpi
+        return my_reverse('summary:edit', kwargs=kwargs)
+
+
+        # def canary(self, debug=False):
         # url = my_reverse('server:canary')
         # return self._get_url( url, debug )
 
@@ -86,12 +92,12 @@ class KPISummaryTests(TestCase):
             kwargs['method'] = method
         return my_reverse('summary:adobe_fake_api', query_kwargs=kwargs)
 
-    # def _get_url(self, url, debug=False):
-        # response = self.client.get(url)
-        # if (debug):
-            # print('\nDebug URL:', url)
-            # print(response.content.decode('utf-8'), '\n')
-        # return response
+    def _get_url(self, url, debug=False):
+        response = self.client.get(url)
+        if (debug):
+            print('\nDebug URL:', url)
+            print(response.content.decode('utf-8'), '\n')
+        return response
 
     def _post_url_and_body(self, url, body, debug=False):
 #        response = self.client.post(url, json.dumps(body), format='json')
@@ -124,22 +130,61 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'Must be a post request')
 
     def test_adobe_fake_api_returns_random_visits_greater_than_100k(self):
-        response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=True)
+        response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=False)
         self._assertRegex(response, r'"visits":"\d{5,}"')
         
+    def test_can_get_kpi_edit_page(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'Edit site_visits kpi')
+
         
 # Tests
+# - Create/Edit dashboard
+#   - GET kpi/summary/edit/site_visits - does not exist
+#       - username
+#       - secret
+#       - queue_url
+#       - queue_body
+#       - get_url
+#       - get_body
+#       - report_period_days
+#       - date_created (display only)
+#       - date_modified (display only)
+#   - GET kpi/summary/edit/site_visits - does exist
+#       - username
+#       - secret
+#       - queue_url
+#       - queue_body
+#       - get_url
+#       - get_body
+#       - report_period_days
+#       - date_created (display only)
+#       - date_modified (display only)
+#   - POST kpi/summary/edit/site_visits - does not exist
+#   - POST kpi/summary/edit/site_visits - does exist
+#   - stylesheet used
+#   - kpi_name displayed in page heading
+#   - username, secret, get_url, get_body is compulsory
+#   - secret value is blank/masked, but new value can be added, if not changed, it isn't updated to blank or erroneous value in DB
+#   - report period days is max 31 days
+
 # MVP
-# - Fake Adobe Endpoint
-#   - Endpoint returns 'You must post to this endpoint' on GET
-#   - Checks for WSSE header
-#   - Returns KPI data
 # - Create/Edit dashboard
 #   - GET kpi/summary/edit/site_visits will display the current fields for dashboard named site_visits, or blank if empty
 #   - POST kpi/summary/edit/site_visits will update the fields to the database
 # - Display dashboard as table
 #   - GET kpi/summary/table/site_visits will display the kpi raw data for the report period
-#   - will get missing data before display
+#   - will get and store missing data before display
+#       - will request data for each day of the report period
+#       - will retry 5 times before giving up
+#       - will detect authentication error
+#       - will detect time zone problem
+#       - will detect invalid request
+#   - returns error if dashboard does not exist
+# - Fake Adobe Endpoint
+#   - Endpoint returns 'You must post to this endpoint' on GET
+#   - Checks for WSSE header
+#   - Returns KPI data
 # - Display dashboard as graph
-#   - GET kpi/summary/table/site_visits will graph the kpi for the report period
+#   - GET kpi/summary/graph/site_visits will graph the kpi for the report period
 #   - will get missing data before display

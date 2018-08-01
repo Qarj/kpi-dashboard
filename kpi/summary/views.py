@@ -44,3 +44,10 @@ def adobe_fake_api(request):
     random.seed(target_date)
 
     return HttpResponse('"visits":"' + str(random.randrange(100_000, 250_000)) + '"')
+
+@csrf_exempt
+def edit(request, kpi):
+    if request.method != 'GET':
+        return HttpResponse('Only get supported for the moment')
+
+    return HttpResponse('Edit ' + kpi + ' kpi')
