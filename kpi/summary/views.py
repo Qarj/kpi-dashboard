@@ -4,7 +4,10 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
+
+from .forms import EditForm
 from django.views.decorators.csrf import csrf_exempt
+
 import random, json
 
 def index(request):
@@ -50,4 +53,22 @@ def edit(request, kpi):
     if request.method != 'GET':
         return HttpResponse('Only get supported for the moment')
 
-    return HttpResponse('Edit ' + kpi + ' kpi')
+    form = EditForm()
+    page_title = 'abcd'
+    page_heading = 'xyz'
+    kpi_name = kpi
+
+
+    context = {
+        'form': form,
+        'kpi_name': kpi,
+        'page_title': page_title,
+        'page_heading': page_heading,
+    }
+
+    return render(request, 'summary/edit.html', context)
+
+#    return HttpResponse('Edit ' + kpi + ' kpi')
+
+
+

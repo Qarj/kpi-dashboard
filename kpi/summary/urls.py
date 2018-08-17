@@ -14,7 +14,7 @@ urlpatterns = [
     # ex: /kpi/summary/adobe_fake_api/?method=Report.Run
     path('adobe_fake_api/', views.adobe_fake_api, name='adobe_fake_api'),
 
-    # ex: /kpi/summary/edit/kpi_visits
+    # ex: /kpi/summary/edit/kpi_visits/
     path('edit/<kpi>/', views.edit, name='edit'),
 
     # ex: /kpi/summary/table/

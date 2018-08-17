@@ -1,0 +1,59 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+
+    <h2>{{ page_heading }}</h2>
+    <h4>Edit {{ kpi_name }} kpi</h4>
+
+    <form action="{% url 'summary:edit' kpi_name %}" method="post">
+        <table id="dashboard_table">
+            <tr>
+                <th>
+                    <label for="id_username"></label>
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <input type="text" class="oneline" name="username" id="id_username" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input class="submit-button" type="submit" value="Submit Dashboard" />
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <div class="row">
+        <div class="column">
+            <h4>Example Queue request</h4>
+
+            <textarea readonly class="steps" cols="68" rows="15">
+
+{
+	"reportDescription":{
+		"reportSuiteID":"{SUITE_ID}",
+		"date":"{YYYY_1}-{MM_1}-{DD_1}",
+		"dateGranularity":"day",
+		"metrics":[
+			{
+				"id":"{METRIC_ID}"
+			}
+		]
+	}
+}
+            </textarea>
+        </div>
+
+        <div class="column">
+            <h4>Example Get request</h4>
+
+            <textarea readonly class="steps" cols="68" rows="15">
+
+{"reportID":{REPORT_ID}}
+            </textarea>
+        </div>
+    </div>
+
+{% endblock %}

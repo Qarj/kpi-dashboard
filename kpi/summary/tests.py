@@ -137,7 +137,10 @@ class KPISummaryTests(TestCase):
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'Edit site_visits kpi')
 
-        
+    def test_edit_page_form_has_username_field(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'username')
+
 # Tests
 # - Create/Edit dashboard
 #   - GET kpi/summary/edit/site_visits - does not exist
