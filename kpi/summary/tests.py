@@ -82,6 +82,18 @@ class KPISummaryTests(TestCase):
         # url = my_reverse('server:canary')
         # return self._get_url( url, debug )
 
+    def submit_edit(self, kpi, debug=False):
+        body = {
+                    'username': 'my_user',
+                    'secret': 'my_secret',
+                    'queue_url': 'my_queue_url',
+                    'queue_body': 'my_queue_body',
+                    'get_url': 'my_get_url',
+                    'get_body': 'my_get_body',
+                    'report_period_days': '8',
+        }
+        return self._post_url_and_body( self._build_edit_url(kpi), body, debug )
+
     def adobe_fake_api(self, body, debug=False, method=''):
         my_date = '8888-88-88'
         return self._post_url_and_body( self._build_adobe_fake_api_url(method), body, debug )
@@ -100,7 +112,6 @@ class KPISummaryTests(TestCase):
         return response
 
     def _post_url_and_body(self, url, body, debug=False):
-#        response = self.client.post(url, json.dumps(body), format='json')
         response = self.client.generic('POST', url, json.dumps(body))
         if (debug):
             print('\nDebug URL :', url)
@@ -192,6 +203,9 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'Date Modified')
         self.assertContains(response, 'id="id_date_modified"><') # is blank
 
+    def test_can_submit_edit_dashboard_form_for_new_kpi(self):
+        response = self.submit_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'Well done!')
 
 
 # Tests

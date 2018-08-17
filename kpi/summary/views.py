@@ -51,7 +51,7 @@ def adobe_fake_api(request):
 @csrf_exempt
 def edit(request, kpi):
     if request.method != 'GET':
-        return HttpResponse('Only get supported for the moment')
+        return HttpResponse('Only get supported for the moment - Well done!')
 
     form = EditForm()
     page_title = 'Edit ' + kpi
