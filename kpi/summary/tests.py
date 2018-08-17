@@ -92,11 +92,11 @@ class KPISummaryTests(TestCase):
                     'get_body': 'my_get_body',
                     'report_period_days': '8',
         }
-        return self._post_url_and_body( self._build_edit_url(kpi), body, debug )
+        return self._post_url_and_body( self._build_edit_url(kpi), body, debug=debug )
 
     def adobe_fake_api(self, body, debug=False, method=''):
         my_date = '8888-88-88'
-        return self._post_url_and_body( self._build_adobe_fake_api_url(method), body, debug )
+        return self._post_url_and_json_body( self._build_adobe_fake_api_url(method), body, debug )
 
     def _build_adobe_fake_api_url(self, method):
         kwargs={}
@@ -112,10 +112,23 @@ class KPISummaryTests(TestCase):
         return response
 
     def _post_url_and_body(self, url, body, debug=False):
-        response = self.client.generic('POST', url, json.dumps(body))
+        postbody = body
         if (debug):
             print('\nDebug URL :', url)
-            print('\nDebug Body:', body)
+            print('\nDebug Body:', postbody)
+        response = self.client.post(url, body)
+        if (debug):
+            print('\nDebug Response Content Start\n', response.content.decode('utf-8'), '\n')
+            print('\nDebug Response Content End\n')
+        return response
+
+    def _post_url_and_json_body(self, url, body, debug=False):
+        postbody = json.dumps(body)
+        if (debug):
+            print('\nDebug URL :', url)
+            print('\nDebug Body:', postbody)
+        response = self.client.generic('POST', url, postbody)
+        if (debug):
             print('\nDebug Response Content Start\n', response.content.decode('utf-8'), '\n')
             print('\nDebug Response Content End\n')
         return response
@@ -204,8 +217,9 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'id="id_date_modified"><') # is blank
 
     def test_can_submit_edit_dashboard_form_for_new_kpi(self):
-        response = self.submit_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'Well done!')
+        response = self.submit_edit(kpi='site_visits', debug=True)
+        self.assertContains(response, 'All seems OK')
+        self.assertContains(response, 'Data written to database ok')
 
 
 # Tests
@@ -231,6 +245,8 @@ class KPISummaryTests(TestCase):
 #       - date_created (display only)
 #       - date_modified (display only)
 #   - POST kpi/summary/edit/site_visits - does not exist
+#       - can post and get message
+#       - data written to database
 #   - POST kpi/summary/edit/site_visits - does exist
 #   - stylesheet used
 #   - kpi_name displayed in page heading

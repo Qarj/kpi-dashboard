@@ -50,8 +50,9 @@ def adobe_fake_api(request):
 
 @csrf_exempt
 def edit(request, kpi):
-    if request.method != 'GET':
-        return HttpResponse('Only get supported for the moment - Well done!')
+    if request.method == 'POST':
+        return _process_edit_submit(request, kpi)
+#        return HttpResponse('Only get supported for the moment - Well done!')
 
     form = EditForm()
     page_title = 'Edit ' + kpi
@@ -68,7 +69,33 @@ def edit(request, kpi):
 
     return render(request, 'summary/edit.html', context)
 
-#    return HttpResponse('Edit ' + kpi + ' kpi')
 
+def _process_edit_submit(request, kpi):
+    username = request.POST.get('username', None)
+    secret = request.POST.get('secret', None)
+    queue_url = request.POST.get('queue_url', None)
+    queue_body = request.POST.get('queue_body', None)
+    get_url = request.POST.get('get_url', None)
+    get_body = request.POST.get('get_body', None)
+    report_period_days = request.POST.get('report_period_days', None)
 
+    print ('Username:', username)
+    print ('Secret:', secret)
+    print ('Queue URL:', queue_url)
+    print ('kpi:', kpi)
+
+    page_title = 'xyz' + kpi
+    page_heading = 'abcd ' + username
+    error = ''
+
+    context = {
+        'page_title': page_title,
+        'page_heading': page_heading,
+        'error': error,
+        'result_status_message': 'All seems OK',
+    }
+
+    http_status = 200
+
+    return render(request, 'summary/edit_confirmation.html', context, status=http_status)
 
