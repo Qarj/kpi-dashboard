@@ -3,19 +3,85 @@
 {% block content %}
 
     <h2>{{ page_heading }}</h2>
-    <h4>Edit {{ kpi_name }} kpi</h4>
 
     <form action="{% url 'summary:edit' kpi_name %}" method="post">
         <table id="dashboard_table">
             <tr>
                 <th>
-                    <label for="id_username"></label>
+                    <label>KPI Name</label>
                 </th>
+                <td>{{ kpi_name }}</td>
             </tr>
             <tr>
+                <th>
+                    <label for="id_username">API Username</label>
+                </th>
                 <td>
-                    <input type="text" class="oneline" name="username" id="id_username" />
+                    <input type="text" class="narrow-input" name="username" id="id_username" maxlength="50" />
                 </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_username">API Secret</label>
+                </th>
+                <td>
+                    <input type="text" class="narrow-input" name="secret" id="id_secret" maxlength="50" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_queue_url">Queue URL</label>
+                </th>
+                <td>
+                    <input type="text" class="wide-input" name="queue_url" id="id_queue_url" maxlength="200" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_queue_body">Queue Body</label>
+                </th>
+                <td>
+                    <textarea name="queue_body" id="id_queue_body" maxlength="2000" cols="100" rows="15" ></textarea>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_queue_url">Get URL</label>
+                </th>
+                <td>
+                    <input type="text" class="wide-input" name="get_url" id="id_get_url" maxlength="200" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_get_body">Get Body</label>
+                </th>
+                <td>
+                    <textarea name="get_body" id="id_get_body" maxlength="2000" cols="100" rows="5" ></textarea>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_report_period_days">Report Period Days</label>
+                </th>
+                <td>
+                    <input type="number" min="5" max="31" class="narrow-input" name="report_period_days" id="id_report_period_days" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_date_created">Date Created</label>
+                </th>
+                <td id="id_date_created"></td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_date_modified">Date Modified</label>
+                </th>
+                <td id="id_date_modified"></td>
+            </tr>
+            <tr>
+                <td><br/></td>
             </tr>
             <tr>
                 <td>

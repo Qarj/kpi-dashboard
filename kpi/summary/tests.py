@@ -135,24 +135,77 @@ class KPISummaryTests(TestCase):
         
     def test_can_get_kpi_edit_page(self):
         response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'Edit site_visits kpi')
+        self.assertContains(response, 'Create / Edit KPI Dashboard')
+        self.assertContains(response, 'Edit site_visits')
+        self.assertContains(response, 'KPI Name')
+        self.assertContains(response, '>site_visits<')
 
     def test_edit_page_form_has_username_field(self):
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'username')
+        self.assertContains(response, 'class="narrow-input"')
+        self.assertContains(response, 'API Username')
+
+    def test_edit_page_form_has_secret_field(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'secret')
+        self.assertContains(response, 'API Secret')
+        self.assertContains(response, 'maxlength="50"')
+
+    def test_edit_page_form_has_queue_url(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'queue_url')
+        self.assertContains(response, 'Queue URL')
+        self.assertContains(response, 'maxlength="200"')
+
+    def test_edit_page_form_has_queue_body(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'queue_body')
+        self.assertContains(response, 'Queue Body')
+        self.assertContains(response, 'maxlength="2000"')
+
+    def test_edit_page_form_has_get_url(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'get_url')
+        self.assertContains(response, 'Get URL')
+
+    def test_edit_page_form_has_get_body(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'get_body')
+        self.assertContains(response, 'Get Body')
+
+    def test_edit_page_form_has_report_period_days(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'report_period_days')
+        self.assertContains(response, 'Report Period Days')
+        self.assertContains(response, 'type="number" min="5" max="31"')
+
+    def test_edit_page_form_has_blank_date_created(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'date_created')
+        self.assertContains(response, 'Date Created')
+        self.assertContains(response, 'id="id_date_created"><') # is blank
+
+    def test_edit_page_form_has_blank_date_modified(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'date_modified')
+        self.assertContains(response, 'Date Modified')
+        self.assertContains(response, 'id="id_date_modified"><') # is blank
+
+
 
 # Tests
 # - Create/Edit dashboard
-#   - GET kpi/summary/edit/site_visits - does not exist
-#       - username
-#       - secret
-#       - queue_url
-#       - queue_body
-#       - get_url
-#       - get_body
-#       - report_period_days
-#       - date_created (display only)
-#       - date_modified (display only)
+#   * GET kpi/summary/edit/site_visits - does not exist
+#       * username
+#       * secret
+#       * queue_url
+#       * queue_body
+#       * get_url
+#       * get_body
+#       * report_period_days
+#       * date_created (will be blank) (display only)
+#       * date_modified (will be blank) (display only)
 #   - GET kpi/summary/edit/site_visits - does exist
 #       - username
 #       - secret

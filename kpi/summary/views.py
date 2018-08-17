@@ -54,8 +54,8 @@ def edit(request, kpi):
         return HttpResponse('Only get supported for the moment')
 
     form = EditForm()
-    page_title = 'abcd'
-    page_heading = 'xyz'
+    page_title = 'Edit ' + kpi
+    page_heading = 'Create / Edit KPI Dashboard'
     kpi_name = kpi
 
 
