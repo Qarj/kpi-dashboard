@@ -92,7 +92,7 @@ def _process_edit_submit(request, kpi):
         'page_title': page_title,
         'page_heading': page_heading,
         'error': error,
-        'result_status_message': 'All seems OK',
+        'result_status_message': 'KPI config written to database ok',
     }
 
     http_status = 200

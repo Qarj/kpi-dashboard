@@ -138,6 +138,11 @@ class KPISummaryTests(TestCase):
 
     def _assertNotRegex(self, response, regex):
         self.assertNotRegex(response.content.decode('utf-8'), regex)
+        
+
+    #
+    # Tests start here
+    #
 
     def test_adobe_fake_api_info_page_exists(self):
         response = self.client.get(reverse('summary:adobe'))
@@ -218,8 +223,7 @@ class KPISummaryTests(TestCase):
 
     def test_can_submit_edit_dashboard_form_for_new_kpi(self):
         response = self.submit_edit(kpi='site_visits', debug=True)
-        self.assertContains(response, 'All seems OK')
-        self.assertContains(response, 'Data written to database ok')
+        self.assertContains(response, 'KPI config written to database ok')
 
 
 # Tests
