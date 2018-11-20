@@ -222,7 +222,7 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'id="id_date_modified"><') # is blank
 
     def test_can_submit_edit_dashboard_form_for_new_kpi(self):
-        response = self.submit_edit(kpi='site_visits', debug=True)
+        response = self.submit_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'KPI config written to database ok')
 
 

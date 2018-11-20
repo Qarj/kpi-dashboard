@@ -53,7 +53,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
             - [ ] Remember Report id (does not need to be put in DB)
         - [ ] Post to Get
             - [ ] Parse Adobe response into array
-        - [ ] Return page with graph pointint to array
+        - [ ] Return page with JavaScript graphing library pointing to array
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
         - [ ] Must have content type header `Content-Type: application/json`
@@ -64,7 +64,18 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] Post reportID `{"reportID":3582786221}`
         - [ ] Must have content type headaer
         - [ ] Should return JSON Object
-        - [x] Visits returned should be at least 100k
+        - [ ] Should return a count for each day
+        - [ ] Different random number for each day
+        - [ ] Totals value is correct
+        - [ ] Visits returned per day should be in range 100k to 200k
+    - any method
+        - [ ] Presence of Username validated, if not present, actual error message returned
+        - [ ] Presence of PasswordDigest validated, if not present, actual error message returned
+        - [ ] Presence of Nonce validated, if not present, actual error message returned
+        - [ ] Presence of Created validated, if not present, actual error message returned
+        - [ ] Created should not be more than 5 mins in the future, if it is, actual error message returned
+        - [ ] Created should not be more than 5 mins in the past, if it is, actual error message returned
+        - [ ] Must have `Content-Type: application/json` header, else actual error message returned
 - [ ] Canary
     - [ ] Fake endpoint responds to POST Report.Queue
     - [ ] Fake endpoint responds to POST Report.Get

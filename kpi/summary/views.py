@@ -79,10 +79,10 @@ def _process_edit_submit(request, kpi):
     get_body = request.POST.get('get_body', None)
     report_period_days = request.POST.get('report_period_days', None)
 
-    print ('Username:', username)
-    print ('Secret:', secret)
-    print ('Queue URL:', queue_url)
-    print ('kpi:', kpi)
+#    print ('Username:', username)
+#    print ('Secret:', secret)
+#    print ('Queue URL:', queue_url)
+#    print ('kpi:', kpi)
 
     page_title = 'xyz' + kpi
     page_heading = 'abcd ' + username
