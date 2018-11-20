@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 
+from .models import Dash
 from .forms import EditForm
 from django.views.decorators.csrf import csrf_exempt
 
@@ -50,42 +51,50 @@ def adobe_fake_api(request):
 
 @csrf_exempt
 def edit(request, kpi):
+    try:
+        dash = Dash.objects.get(kpi_name=kpi)
+    except Dash.DoesNotExist:
+        dash = Dash( kpi_name = kpi )
+
     if request.method == 'POST':
-        return _process_edit_submit(request, kpi)
-#        return HttpResponse('Only get supported for the moment - Well done!')
+        return _process_edit_submit(request, dash)
 
     form = EditForm()
     page_title = 'Edit ' + kpi
     page_heading = 'Create / Edit KPI Dashboard'
-    kpi_name = kpi
-
 
     context = {
         'form': form,
         'kpi_name': kpi,
         'page_title': page_title,
         'page_heading': page_heading,
+        'current_username': dash.username,
+        'current_report_period_days': dash.report_period_days,
     }
 
     return render(request, 'summary/edit.html', context)
 
 
-def _process_edit_submit(request, kpi):
-    username = request.POST.get('username', None)
+def _process_edit_submit(request, dash):
+
+    dash.username = request.POST.get('username', None)
     secret = request.POST.get('secret', None)
     queue_url = request.POST.get('queue_url', None)
     queue_body = request.POST.get('queue_body', None)
     get_url = request.POST.get('get_url', None)
     get_body = request.POST.get('get_body', None)
-    report_period_days = request.POST.get('report_period_days', None)
+    dash.report_period_days = request.POST.get('report_period_days', None)
+
+#    dash.save(force_insert=True)
+    dash.save()
 
 #    print ('Username:', username)
 #    print ('Secret:', secret)
 #    print ('Queue URL:', queue_url)
 #    print ('kpi:', kpi)
 
-    page_title = 'xyz' + kpi
-    page_heading = 'abcd ' + username
+    page_title = 'xyz' + dash.kpi_name
+    page_heading = 'abcd ' + dash.username
     error = ''
 
     context = {

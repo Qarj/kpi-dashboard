@@ -44,6 +44,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [ ] Date Modified contains date after first submit
     - [ ] Date Created and Date Modifed are equal after first submit
     - [ ] Date Modified is > Date Modified on subsequent submit
+    - [ ] Example Queue request is updated to current plan
 - [ ] Table for KPI /kpi/summary/table/kpi_visits/ (tests use fake endpoint)
     - [ ] Request data for date range
         - [ ] Calculate dateFrom and dateTo

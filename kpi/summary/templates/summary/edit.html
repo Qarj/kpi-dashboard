@@ -17,7 +17,7 @@
                     <label for="id_username">API Username</label>
                 </th>
                 <td>
-                    <input type="text" class="narrow-input" name="username" id="id_username" maxlength="50" />
+                    <input type="text" class="narrow-input" name="username" id="id_username" maxlength="50" value ="{{ current_username }}"/>
                 </td>
             </tr>
             <tr>
@@ -65,7 +65,7 @@
                     <label for="id_report_period_days">Report Period Days</label>
                 </th>
                 <td>
-                    <input type="number" min="5" max="31" class="narrow-input" name="report_period_days" id="id_report_period_days" />
+                    <input type="number" min="5" max="31" class="narrow-input" name="report_period_days" id="id_report_period_days"  value ="{{ current_report_period_days }}"/>
                 </td>
             </tr>
             <tr>

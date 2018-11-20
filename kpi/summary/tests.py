@@ -60,15 +60,6 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    # def runit(self, path, debug=False, batch='', target=''):
-        # kwargs={'path': path}
-        # if (batch):
-            # kwargs['batch'] = batch
-        # if (target):
-            # kwargs['target'] = target
-        # url = my_reverse('server:run', query_kwargs=kwargs)
-        # return self._get_url(url, debug)
-
     def get_edit(self, debug=False, kpi='unknown'):
         return self._get_url( self._build_edit_url(kpi), debug )
 
@@ -77,20 +68,15 @@ class KPISummaryTests(TestCase):
         kwargs['kpi'] = kpi
         return my_reverse('summary:edit', kwargs=kwargs)
 
-
-        # def canary(self, debug=False):
-        # url = my_reverse('server:canary')
-        # return self._get_url( url, debug )
-
-    def submit_edit(self, kpi, debug=False):
+    def submit_edit(self, kpi, username='default_username', report_period_days=7, debug=False):
         body = {
-                    'username': 'my_user',
+                    'username': username,
                     'secret': 'my_secret',
                     'queue_url': 'my_queue_url',
                     'queue_body': 'my_queue_body',
                     'get_url': 'my_get_url',
                     'get_body': 'my_get_body',
-                    'report_period_days': '8',
+                    'report_period_days': report_period_days,
         }
         return self._post_url_and_body( self._build_edit_url(kpi), body, debug=debug )
 
@@ -225,6 +211,15 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'KPI config written to database ok')
 
+    def test_api_username_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', username='my_api_username', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'my_api_username')
+
+    def test_api_report_period_days_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', report_period_days='27', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, '"27"')
 
 # Tests
 # - Create/Edit dashboard
