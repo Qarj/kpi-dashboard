@@ -45,18 +45,15 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [ ] Date Created and Date Modifed are equal after first submit
     - [ ] Date Modified is > Date Modified on subsequent submit
 - [ ] Table for KPI /kpi/summary/table/kpi_visits/ (tests use fake endpoint)
-    - [ ] Determine missing data and request in loop
-        - [ ] All data is missing
-        - [ ] Partial data is missing
+    - [ ] Request data for date range
+        - [ ] Calculate dateFrom and dateTo
+        - [ ] Substitute dateFrom, dateTo and reportSuiteID into Queue Body
         - [ ] Generate WSSE header
-        - [ ] Post to Queue
+        - [ ] Post to Queue URL
             - [ ] Remember Report id (does not need to be put in DB)
         - [ ] Post to Get
-            - [ ] Parse Adobe response
-            - [ ] Put response in DB Date, Value
-        - [ ] Return Table once all data found
-            - [ ] Column 1 - Date
-            - [ ] Column 2 - KPI value
+            - [ ] Parse Adobe response into array
+        - [ ] Return page with graph pointint to array
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
         - [ ] Must have content type header `Content-Type: application/json`
@@ -71,6 +68,23 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 - [ ] Canary
     - [ ] Fake endpoint responds to POST Report.Queue
     - [ ] Fake endpoint responds to POST Report.Get
+- [x] Spike - get metric report for a date range
+```
+{
+    "reportDescription":{
+        "reportSuiteID":"my-brand-id",
+        "dateFrom":"2018-11-12",
+        "dateTo":"2018-11-19",
+        "dateGranularity":"day",
+        "metrics":[
+            {
+                "id":"visits"
+            }
+        ]
+    }
+}
+```
+
 
 ## Tasks - Later
 -[ ] graph previous period - week
