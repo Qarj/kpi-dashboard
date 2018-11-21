@@ -18,7 +18,7 @@ urlpatterns = [
     path('edit/<kpi>/', views.edit, name='edit'),
 
     # ex: /kpi/summary/table/kpi_visits/
-#    path('table/<kpi>/', views.table, name='table'),
+    path('table/<kpi>/', views.table, name='table'),
 
     # ex: /kpi/summary/canary/
 #    path('canary/', views.canary, name='canary'),

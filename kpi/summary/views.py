@@ -9,6 +9,7 @@ from .models import Dash
 from .forms import EditForm
 from django.views.decorators.csrf import csrf_exempt
 
+from datetime import date, timedelta
 import random, json
 
 def index(request):
@@ -127,3 +128,33 @@ def _process_edit_submit(request, dash):
 
     return render(request, 'summary/edit_confirmation.html', context, status=http_status)
 
+
+def table(request, kpi):
+    try:
+        dash = Dash.objects.get(kpi_name=kpi)
+    except Dash.DoesNotExist:
+        dash = Dash( kpi_name = kpi )
+        dash.date_created = ''
+        dash.date_modified = ''
+
+    debug = request.GET.get('debug', None)
+
+    page_title = kpi + ' table'
+    page_heading = str(dash.report_period_days) + ' days table view for KPI ' + kpi
+    date_from = _kpi_date(dash.report_period_days)
+    date_to = _kpi_date(1)
+
+    context = {
+        'kpi_name': kpi,
+        'page_title': page_title,
+        'page_heading': page_heading,
+        'date_from': date_from,
+        'date_to': date_to,
+        'debug': debug,
+    }
+
+    return render(request, 'summary/table.html', context)
+
+def _kpi_date(offset):
+    desired_date = date.today() - timedelta(offset)
+    return desired_date.strftime("%Y-%m-%d")

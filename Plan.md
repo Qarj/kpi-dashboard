@@ -47,6 +47,16 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [x] `date_modified` contains date on first submit
     - [x] Example Queue request is updated to current plan
 - [ ] Table for KPI /kpi/summary/table/kpi_visits/ (tests use fake endpoint)
+    - [x] Table view has heading
+    - [x] Table view has title
+    - [x] Table view shows number of days requested
+    - [x] Table view shows fromDate in format required by Adobe
+    - [x] Table view shows toDate in format required by Adobe
+    - [x] Show from and to dates in table
+    - [ ] Table view shows calculated Report.Queue body in ?debug=true mode
+    - [ ] Table view shows calculated X-WSSE header in ?debug=true mode
+    - [ ] Table view shows content type header in ?debug=true mode
+    - [ ] Table view has message if kpi is unknown
     - [ ] Request data for date range
         - [ ] Calculate dateFrom and dateTo
         - [ ] Substitute dateFrom, dateTo and reportSuiteID into Queue Body

@@ -25,7 +25,7 @@ def my_reverse(viewname, kwargs=None, query_kwargs=None):
     return url
 
 def kpi_date(offset):
-    desired_date = date.today() + timedelta(offset)
+    desired_date = date.today() - timedelta(offset)
     return desired_date.strftime("%Y-%m-%d")
 
 #target_date = '9999-99-99'
@@ -59,6 +59,16 @@ class KPISummaryTests(TestCase):
     #
     # test helpers
     #
+
+    def get_table(self, debug=False, kpi='unknown', page_debug='true'):
+        return self._get_url( self._build_table_url(kpi, page_debug), debug )
+
+    def _build_table_url(self, kpi, page_debug):
+        kwargs={}
+        kwargs['kpi'] = kpi
+        query_kwargs={}
+        query_kwargs['debug'] =  page_debug
+        return my_reverse('summary:table', kwargs=kwargs, query_kwargs=query_kwargs)
 
     def get_edit(self, debug=False, kpi='unknown'):
         return self._get_url( self._build_edit_url(kpi), debug )
@@ -286,6 +296,40 @@ class KPISummaryTests(TestCase):
     # Get KPI data in table view
     #
 
+    def test_get_kpi_table_heading(self):
+        response = self.submit_edit(kpi='table', debug=False)
+        response = self.get_table(kpi='table', debug=False)
+        self.assertContains(response, 'table view for KPI table')
+
+    def test_get_kpi_table_title(self):
+        response = self.submit_edit(kpi='title', debug=False)
+        response = self.get_table(kpi='title', debug=False)
+        self.assertContains(response, 'title table')
+
+    def test_get_kpi_table_num_days(self):
+        response = self.submit_edit(kpi='title', report_period_days='7', debug=False)
+        response = self.get_table(kpi='title', debug=False)
+        self.assertContains(response, '7 days table view')
+
+    def test_get_kpi_table_datefrom(self):
+        response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
+        response = self.get_table(kpi='range', debug=False)
+        self.assertContains(response, 'dateFrom">' + kpi_date(2))
+
+    def test_get_kpi_table_dateto(self):
+        response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
+        response = self.get_table(kpi='range', debug=False)
+        self.assertContains(response, 'dateTo">' + kpi_date(1))
+
+    def test_get_kpi_table_dateto(self):
+        response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
+        response = self.get_table(kpi='range', debug=False)
+        self.assertContains(response, 'dateTo">' + kpi_date(1))
+
+    def test_get_kpi_table_debug_info_only_shown_in_debug_mode(self):
+        response = self.submit_edit(kpi='debug', report_period_days='2', debug=False)
+        response = self.get_table(kpi='debug', page_debug='false', debug=False)
+        self._assertNotRegex(response, r'dateFrom')
 
 # Tests
 # - Create/Edit dashboard
