@@ -72,13 +72,13 @@
                 <th>
                     <label for="id_date_created">Date Created</label>
                 </th>
-                <td id="id_date_created"></td>
+                <td name="date_created" id="id_date_created">{{ current_date_created }}</td>
             </tr>
             <tr>
                 <th>
                     <label for="id_date_modified">Date Modified</label>
                 </th>
-                <td id="id_date_modified"></td>
+                <td name="date_modified" id="id_date_modified">{{ current_date_modified }}</td>
             </tr>
             <tr>
                 <td><br/></td>
@@ -98,16 +98,17 @@
             <textarea readonly class="steps" cols="68" rows="15">
 
 {
-	"reportDescription":{
-		"reportSuiteID":"{SUITE_ID}",
-		"date":"{YYYY_1}-{MM_1}-{DD_1}",
-		"dateGranularity":"day",
-		"metrics":[
-			{
-				"id":"{METRIC_ID}"
-			}
-		]
-	}
+    "reportDescription":{
+        "reportSuiteID":"{REPORT_SUITE_ID}",
+        "dateFrom":"{DATE_FROM}",
+        "dateTo":"{DATE_TO}",
+        "dateGranularity":"day",
+        "metrics":[
+            {
+                "id":"visits"
+            }
+        ]
+    }
 }
             </textarea>
         </div>

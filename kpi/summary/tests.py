@@ -135,6 +135,10 @@ class KPISummaryTests(TestCase):
     # Tests start here
     #
 
+    #
+    # Fake Adobe endpoint
+    #
+
     def test_adobe_fake_api_info_page_exists(self):
         response = self.client.get(reverse('summary:adobe'))
         self.assertEqual(response.status_code, 200)
@@ -152,7 +156,12 @@ class KPISummaryTests(TestCase):
     def test_adobe_fake_api_returns_random_visits_greater_than_100k(self):
         response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=False)
         self._assertRegex(response, r'"visits":"\d{5,}"')
-        
+
+
+    #
+    # Create / Edit KPI form
+    #
+
     def test_can_get_kpi_edit_page(self):
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'Create / Edit KPI Dashboard')
@@ -198,7 +207,7 @@ class KPISummaryTests(TestCase):
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'report_period_days')
         self.assertContains(response, 'Report Period Days')
-        self.assertContains(response, 'type="number" min="5" max="31"')
+        self.assertContains(response, 'type="number" min="1" max="31"')
 
     def test_edit_page_form_has_blank_date_created(self):
         response = self.get_edit(kpi='site_visits', debug=False)
@@ -261,6 +270,22 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='site_visits', get_body='{ report_id: 42 }', debug=False)
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, '{ report_id: 42 }')
+
+    def test_date_created_visible_on_subsequent_form_get(self):
+        response = self.submit_edit(kpi='created', debug=False)
+        response = self.get_edit(kpi='created', debug=False)
+        self._assertRegex(response, r'date_created">\w+\. \d+, \d{4,4}')
+
+    def test_date_modified_visible_on_subsequent_form_get(self):
+        response = self.submit_edit(kpi='visible', debug=False)
+        response = self.get_edit(kpi='visible', debug=False)
+        self._assertRegex(response, r'date_modified">\w+\. \d+, \d{4,4}')
+
+
+    #
+    # Get KPI data in table view
+    #
+
 
 # Tests
 # - Create/Edit dashboard

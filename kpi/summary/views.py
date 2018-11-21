@@ -55,6 +55,8 @@ def edit(request, kpi):
         dash = Dash.objects.get(kpi_name=kpi)
     except Dash.DoesNotExist:
         dash = Dash( kpi_name = kpi )
+        dash.date_created = ''
+        dash.date_modified = ''
 
     if request.method == 'POST':
         return _process_edit_submit(request, dash)
@@ -78,6 +80,8 @@ def edit(request, kpi):
         'current_queue_body': dash.queue_body,
         'current_get_url': dash.get_url,
         'current_get_body': dash.get_body,
+        'current_date_created': dash.date_created,
+        'current_date_modified': dash.date_modified,
         'current_report_period_days': dash.report_period_days,
     }
 

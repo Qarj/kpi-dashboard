@@ -43,11 +43,9 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Max Value of 31
         - [x] Min Value of 1
         - [x] Must be an integer
-    - [ ] `date_created` contains date on first submit
-    - [ ] `date_modified` contains date on first submit
-    - [ ] date_created and date_modified are equal on first submit
-    - [ ] date_modified is > date_created on subsequent submit
-    - [ ] Example Queue request is updated to current plan
+    - [x] `date_created` contains date on first submit
+    - [x] `date_modified` contains date on first submit
+    - [x] Example Queue request is updated to current plan
 - [ ] Table for KPI /kpi/summary/table/kpi_visits/ (tests use fake endpoint)
     - [ ] Request data for date range
         - [ ] Calculate dateFrom and dateTo
