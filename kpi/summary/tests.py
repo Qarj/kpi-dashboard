@@ -80,7 +80,21 @@ class KPISummaryTests(TestCase):
 
     def submit_edit(self, kpi, username='default_username', report_period_days=7, secret='default_secret',
                     queue_url='http://default_queue',
-                    queue_body='default queue body',
+                    queue_body="""
+{
+    "reportDescription":{
+        "reportSuiteID":"my-brand-id",
+        "dateFrom":"{DATE_FROM}",
+        "dateTo":"{DATE_TO}",
+        "dateGranularity":"day",
+        "metrics":[
+            {
+                "id":"visits"
+            }
+        ]
+    }
+}
+""",
                     get_url='http://default_get',
                     get_body='default get body',
                     debug=False):
@@ -330,6 +344,12 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='debug', report_period_days='2', debug=False)
         response = self.get_table(kpi='debug', page_debug='false', debug=False)
         self._assertNotRegex(response, r'dateFrom')
+
+    def test_get_kpi_table_shows_substituted_report_queue_body(self):
+        response = self.submit_edit(kpi='queue_body', report_period_days='2', debug=False)
+        response = self.get_table(kpi='queue_body', debug=False)
+        self.assertContains(response, 'dateGranularity')
+        self.assertContains(response, 'dateFrom&quot;:&quot;' + kpi_date(2))
 
 # Tests
 # - Create/Edit dashboard

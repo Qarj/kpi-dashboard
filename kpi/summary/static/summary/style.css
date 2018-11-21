@@ -82,12 +82,13 @@ a:hover, a:visited, a:link, a:active
 table {
   border-spacing: 14px 2px;
 }
-table, th, td {
-    border: 2px solid orange;
-    border-collapse: collapse;
-}
 th, td {
     padding: 5px;
+}
+
+table.debug td, table.debug {
+    border: 2px solid orange;
+    border-collapse: collapse;
 }
 
 .normal { color: #1e8ad6; }

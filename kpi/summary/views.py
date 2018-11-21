@@ -141,8 +141,10 @@ def table(request, kpi):
 
     page_title = kpi + ' table'
     page_heading = str(dash.report_period_days) + ' days table view for KPI ' + kpi
+
     date_from = _kpi_date(dash.report_period_days)
     date_to = _kpi_date(1)
+    dash.queue_body = dash.queue_body.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
 
     context = {
         'kpi_name': kpi,
@@ -151,6 +153,7 @@ def table(request, kpi):
         'date_from': date_from,
         'date_to': date_to,
         'debug': debug,
+        'queue_body': dash.queue_body,
     }
 
     return render(request, 'summary/table.html', context)
