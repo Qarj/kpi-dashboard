@@ -68,14 +68,19 @@ class KPISummaryTests(TestCase):
         kwargs['kpi'] = kpi
         return my_reverse('summary:edit', kwargs=kwargs)
 
-    def submit_edit(self, kpi, username='default_username', report_period_days=7, debug=False):
+    def submit_edit(self, kpi, username='default_username', report_period_days=7, secret='default_secret',
+                    queue_url='http://default_queue',
+                    queue_body='default queue body',
+                    get_url='http://default_get',
+                    get_body='default get body',
+                    debug=False):
         body = {
                     'username': username,
-                    'secret': 'my_secret',
-                    'queue_url': 'my_queue_url',
-                    'queue_body': 'my_queue_body',
-                    'get_url': 'my_get_url',
-                    'get_body': 'my_get_body',
+                    'secret': secret,
+                    'queue_url': queue_url,
+                    'queue_body': queue_body,
+                    'get_url': get_url,
+                    'get_body': get_body,
                     'report_period_days': report_period_days,
         }
         return self._post_url_and_body( self._build_edit_url(kpi), body, debug=debug )
@@ -220,6 +225,42 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='site_visits', report_period_days='27', debug=False)
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, '"27"')
+
+    def test_secret_displays_empty_when_no_data(self):
+        response = self.submit_edit(kpi='site_visits', secret='', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'name="secret" value=""')
+    
+    def test_secret_displays_eight_asterix_when_has_data(self):
+        response = self.submit_edit(kpi='site_visits', secret='my_api_secret', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'name="secret" value="********"')
+
+    def test_secret_does_not_update_when_eight_asterix_submitted(self):
+        response = self.submit_edit(kpi='site_visits', secret='my_api_secret', debug=False)
+        self.assertContains(response, 'API Secret updated')
+        response = self.submit_edit(kpi='site_visits', secret='********', debug=False)
+        self.assertContains(response, 'API Secret not updated')
+
+    def test_queue_url_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', queue_url='https://api', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'name="queue_url" value="https://api"')
+
+    def test_queue_body_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', queue_body='{ queued: true }', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, '{ queued: true }')
+
+    def test_get_url_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', get_url='https://api_get', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'name="get_url" value="https://api_get"')
+
+    def test_get_body_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', get_body='{ report_id: 42 }', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, '{ report_id: 42 }')
 
 # Tests
 # - Create/Edit dashboard

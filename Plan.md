@@ -30,20 +30,23 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 - [x] Create favicon
 - [x] Get running under Apache
 - Edit KPI
-    - [ ] API Username update
-    - [ ] API Secret update
-    - [ ] Queue URL update
-    - [ ] Queue Body update
-    - [ ] Get URL update
-    - [ ] Get Body update
-    - [ ] Report Period Days update
+    - [x] API `username` update
+    - [x] API `secret` update
+        - [x] secret is blank when no data
+        - [x] secret is 8x asterix on form when data exists
+        - [x] secret is only updated to the database when value other than 8x asterix submitted
+    - [x] `queue_url` update
+    - [x] `queue_body` update
+    - [ ] `get_url` update
+    - [ ] `get_body` update
+    - [ ] `report_period_days` update
         - [ ] Max Value of 31
         - [ ] Min Value of 1
         - [ ] Must be an integer
-    - [ ] Date Created contains date after first submit
-    - [ ] Date Modified contains date after first submit
-    - [ ] Date Created and Date Modifed are equal after first submit
-    - [ ] Date Modified is > Date Modified on subsequent submit
+    - [ ] `date_created` contains date on first submit
+    - [ ] `date_modified` contains date on first submit
+    - [ ] date_created and date_modified are equal on first submit
+    - [ ] date_modified is > date_created on subsequent submit
     - [ ] Example Queue request is updated to current plan
 - [ ] Table for KPI /kpi/summary/table/kpi_visits/ (tests use fake endpoint)
     - [ ] Request data for date range
@@ -106,7 +109,8 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 
 http://localhost/kpi/summary/
 
-Restart Apache
+Restart Apache - must be ADMINISTRATOR
 ```
+echo must be ADMIN, will pretend to work if not, but will fail
 \Apache24\bin\httpd -k restart
 ```

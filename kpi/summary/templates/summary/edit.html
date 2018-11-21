@@ -17,15 +17,15 @@
                     <label for="id_username">API Username</label>
                 </th>
                 <td>
-                    <input type="text" class="narrow-input" name="username" id="id_username" maxlength="50" value ="{{ current_username }}"/>
+                    <input type="text" class="narrow-input" name="username" value="{{ current_username }}" id="id_username" maxlength="50" />
                 </td>
             </tr>
             <tr>
                 <th>
-                    <label for="id_username">API Secret</label>
+                    <label for="id_secret">API Secret</label>
                 </th>
                 <td>
-                    <input type="text" class="narrow-input" name="secret" id="id_secret" maxlength="50" />
+                    <input type="text" class="narrow-input" name="secret" value="{{ current_secret }}" id="id_secret" maxlength="50" />
                 </td>
             </tr>
             <tr>
@@ -33,7 +33,7 @@
                     <label for="id_queue_url">Queue URL</label>
                 </th>
                 <td>
-                    <input type="text" class="wide-input" name="queue_url" id="id_queue_url" maxlength="200" />
+                    <input type="text" class="wide-input" name="queue_url" value="{{ current_queue_url }}" id="id_queue_url" maxlength="200" />
                 </td>
             </tr>
             <tr>
@@ -41,7 +41,7 @@
                     <label for="id_queue_body">Queue Body</label>
                 </th>
                 <td>
-                    <textarea name="queue_body" id="id_queue_body" maxlength="2000" cols="100" rows="15" ></textarea>
+                    <textarea name="queue_body" id="id_queue_body" maxlength="2000" cols="100" rows="15" >{{ current_queue_body }}</textarea>
                 </td>
             </tr>
             <tr>
@@ -49,7 +49,7 @@
                     <label for="id_queue_url">Get URL</label>
                 </th>
                 <td>
-                    <input type="text" class="wide-input" name="get_url" id="id_get_url" maxlength="200" />
+                    <input type="text" class="wide-input" name="get_url" value="{{ current_get_url }}" id="id_get_url" maxlength="200" />
                 </td>
             </tr>
             <tr>
@@ -57,7 +57,7 @@
                     <label for="id_get_body">Get Body</label>
                 </th>
                 <td>
-                    <textarea name="get_body" id="id_get_body" maxlength="2000" cols="100" rows="5" ></textarea>
+                    <textarea name="get_body" id="id_get_body" maxlength="2000" cols="100" rows="5" >{{ current_get_body }}</textarea>
                 </td>
             </tr>
             <tr>
@@ -65,7 +65,7 @@
                     <label for="id_report_period_days">Report Period Days</label>
                 </th>
                 <td>
-                    <input type="number" min="5" max="31" class="narrow-input" name="report_period_days" id="id_report_period_days"  value ="{{ current_report_period_days }}"/>
+                    <input type="number" min="5" max="31" class="narrow-input" name="report_period_days" value="{{ current_report_period_days }}" id="id_report_period_days" />
                 </td>
             </tr>
             <tr>

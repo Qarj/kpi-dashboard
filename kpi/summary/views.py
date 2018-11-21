@@ -59,6 +59,10 @@ def edit(request, kpi):
     if request.method == 'POST':
         return _process_edit_submit(request, dash)
 
+    secret_display = ''
+    if dash.secret:
+        secret_display = '********'
+
     form = EditForm()
     page_title = 'Edit ' + kpi
     page_heading = 'Create / Edit KPI Dashboard'
@@ -69,6 +73,11 @@ def edit(request, kpi):
         'page_title': page_title,
         'page_heading': page_heading,
         'current_username': dash.username,
+        'current_secret': secret_display,
+        'current_queue_url': dash.queue_url,
+        'current_queue_body': dash.queue_body,
+        'current_get_url': dash.get_url,
+        'current_get_body': dash.get_body,
         'current_report_period_days': dash.report_period_days,
     }
 
@@ -78,14 +87,19 @@ def edit(request, kpi):
 def _process_edit_submit(request, dash):
 
     dash.username = request.POST.get('username', None)
-    secret = request.POST.get('secret', None)
-    queue_url = request.POST.get('queue_url', None)
-    queue_body = request.POST.get('queue_body', None)
-    get_url = request.POST.get('get_url', None)
-    get_body = request.POST.get('get_body', None)
+    dash.queue_url = request.POST.get('queue_url', None)
+    dash.queue_body = request.POST.get('queue_body', None)
+    dash.get_url = request.POST.get('get_url', None)
+    dash.get_body = request.POST.get('get_body', None)
     dash.report_period_days = request.POST.get('report_period_days', None)
 
-#    dash.save(force_insert=True)
+    submitted_secret = request.POST.get('secret', None)
+    if submitted_secret == '********':
+        secret_message = 'API Secret not updated'
+    else:
+        dash.secret = submitted_secret
+        secret_message = 'API Secret updated'
+
     dash.save()
 
 #    print ('Username:', username)
@@ -102,6 +116,7 @@ def _process_edit_submit(request, dash):
         'page_heading': page_heading,
         'error': error,
         'result_status_message': 'KPI config written to database ok',
+        'secret_message': secret_message,
     }
 
     http_status = 200
