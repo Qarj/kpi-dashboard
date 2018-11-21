@@ -37,12 +37,12 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] secret is only updated to the database when value other than 8x asterix submitted
     - [x] `queue_url` update
     - [x] `queue_body` update
-    - [ ] `get_url` update
-    - [ ] `get_body` update
-    - [ ] `report_period_days` update
-        - [ ] Max Value of 31
-        - [ ] Min Value of 1
-        - [ ] Must be an integer
+    - [x] `get_url` update
+    - [x] `get_body` update
+    - [x] `report_period_days` update
+        - [x] Max Value of 31
+        - [x] Min Value of 1
+        - [x] Must be an integer
     - [ ] `date_created` contains date on first submit
     - [ ] `date_modified` contains date on first submit
     - [ ] date_created and date_modified are equal on first submit

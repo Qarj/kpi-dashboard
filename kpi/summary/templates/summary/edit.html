@@ -33,7 +33,7 @@
                     <label for="id_queue_url">Queue URL</label>
                 </th>
                 <td>
-                    <input type="text" class="wide-input" name="queue_url" value="{{ current_queue_url }}" id="id_queue_url" maxlength="200" />
+                    <input type="url" class="wide-input" name="queue_url" value="{{ current_queue_url }}" id="id_queue_url" maxlength="200" />
                 </td>
             </tr>
             <tr>
@@ -46,10 +46,10 @@
             </tr>
             <tr>
                 <th>
-                    <label for="id_queue_url">Get URL</label>
+                    <label for="id_get_url">Get URL</label>
                 </th>
                 <td>
-                    <input type="text" class="wide-input" name="get_url" value="{{ current_get_url }}" id="id_get_url" maxlength="200" />
+                    <input type="url" class="wide-input" name="get_url" value="{{ current_get_url }}" id="id_get_url" maxlength="200" />
                 </td>
             </tr>
             <tr>
@@ -65,7 +65,7 @@
                     <label for="id_report_period_days">Report Period Days</label>
                 </th>
                 <td>
-                    <input type="number" min="5" max="31" class="narrow-input" name="report_period_days" value="{{ current_report_period_days }}" id="id_report_period_days" />
+                    <input type="number" min="1" max="31" step="1" pattern="\d+" required class="narrow-input" name="report_period_days" value="{{ current_report_period_days }}" id="id_report_period_days" />
                 </td>
             </tr>
             <tr>
