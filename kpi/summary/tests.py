@@ -351,6 +351,24 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'dateGranularity')
         self.assertContains(response, 'dateFrom&quot;:&quot;' + kpi_date(2))
 
+    def test_get_kpi_table_shows_x_wsse_header_in_debug_mode(self):
+        response = self.submit_edit(kpi='x-wsse_username', username="my:user", debug=False)
+        response = self.get_table(kpi='x-wsse_username', debug=False)
+        self.assertContains(response, 'Username=&quot;my:user&quot;')
+        self.assertContains(response, 'PasswordDigest=')
+        self.assertContains(response, 'Nonce=')
+        self.assertContains(response, 'Created=')
+
+    def test_get_kpi_table_shows_content_type_header_in_debug_mode(self):
+        response = self.submit_edit(kpi='content_type', username="my:user", debug=False)
+        response = self.get_table(kpi='content_type', debug=False)
+        self.assertContains(response, 'application/json')
+
+    def test_get_kpi_table_shows_message_when_kpi_not_defined(self):
+        response = self.get_table(kpi='unknown_kpi_definition', debug=False)
+        self.assertContains(response, 'unknown_kpi_definition has not been defined')
+
+
 # Tests
 # - Create/Edit dashboard
 #   * GET kpi/summary/edit/site_visits - does not exist

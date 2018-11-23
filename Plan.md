@@ -53,10 +53,14 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [x] Table view shows fromDate in format required by Adobe
     - [x] Table view shows toDate in format required by Adobe
     - [x] Show from and to dates in table
-    - [ ] Table view shows calculated Report.Queue body in ?debug=true mode
-    - [ ] Table view shows calculated X-WSSE header in ?debug=true mode
-    - [ ] Table view shows content type header in ?debug=true mode
-    - [ ] Table view has message if kpi is unknown
+    - [x] Table view shows calculated Report.Queue body in ?debug=true mode
+    - [x] Table view shows calculated X-WSSE header in ?debug=true mode
+        - [x] Username component
+        - [x] Password digest component
+        - [x] Nonce component
+        - [x] Created component
+    - [x] Table view shows content type header in ?debug=true mode
+    - [x] Table view has message if kpi is unknown
     - [ ] Request data for date range
         - [ ] Calculate dateFrom and dateTo
         - [ ] Substitute dateFrom, dateTo and reportSuiteID into Queue Body
@@ -122,3 +126,10 @@ Restart Apache - must be ADMINISTRATOR
 echo must be ADMIN, will pretend to work if not, but will fail
 \Apache24\bin\httpd -k restart
 ```
+
+References:
+- https://github.com/dancingcactus/python-omniture
+- X-WSSE https://gist.github.com/bebehei/5e3357e5a1bf46ec381379ef8f525c7f
+- X-WSSE https://forums.adobe.com/ideas/10397
+- X-WSSE https://forums.adobe.com/thread/2405028  (errors)
+

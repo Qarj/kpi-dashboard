@@ -9,8 +9,8 @@ from .models import Dash
 from .forms import EditForm
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import date, timedelta
-import random, json
+from datetime import datetime, date, timedelta
+import random, json, hashlib, string, binascii
 
 def index(request):
     page_title = "KPI Dashboard"
@@ -130,21 +130,24 @@ def _process_edit_submit(request, dash):
 
 
 def table(request, kpi):
+
+    page_title = kpi + ' table'
+
     try:
         dash = Dash.objects.get(kpi_name=kpi)
     except Dash.DoesNotExist:
-        dash = Dash( kpi_name = kpi )
-        dash.date_created = ''
-        dash.date_modified = ''
+        return render(request, 'summary/error.html', {'page_title': page_title, 'error_message': kpi + ' has not been defined'})
 
     debug = request.GET.get('debug', None)
 
-    page_title = kpi + ' table'
     page_heading = str(dash.report_period_days) + ' days table view for KPI ' + kpi
 
     date_from = _kpi_date(dash.report_period_days)
     date_to = _kpi_date(1)
     dash.queue_body = dash.queue_body.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
+
+    xwsse_header = _build_xwsse_header(dash.username, dash.secret)
+    content_header = 'application/json'
 
     context = {
         'kpi_name': kpi,
@@ -154,6 +157,8 @@ def table(request, kpi):
         'date_to': date_to,
         'debug': debug,
         'queue_body': dash.queue_body,
+        'xwsse_header': xwsse_header,
+        'content_header': content_header,
     }
 
     return render(request, 'summary/table.html', context)
@@ -161,3 +166,27 @@ def table(request, kpi):
 def _kpi_date(offset):
     desired_date = date.today() - timedelta(offset)
     return desired_date.strftime("%Y-%m-%d")
+
+def _build_xwsse_header(username, secret):
+    nonce = hashlib.md5(''.join(random.choices(string.ascii_uppercase + string.digits, k=42)).encode()).hexdigest()
+    base64nonce = binascii.b2a_base64(binascii.a2b_qp(nonce))
+    created_date = datetime.utcnow().isoformat() + 'Z'
+    sha = nonce + created_date + secret
+    sha_object = hashlib.sha1(sha.encode())
+    password_64 = binascii.b2a_base64(sha_object.digest())
+
+    properties = {
+        "Username": username,
+        "PasswordDigest": password_64.decode().strip(),
+        "Nonce": base64nonce.decode().strip(),
+        "Created": created_date,
+    }
+    header = 'UsernameToken ' + _serialize_header(properties)
+
+    return header
+
+def _serialize_header(properties):
+    header = []
+    for key, value in properties.items():
+        header.append('{key}="{value}"'.format(key=key, value=value))
+    return ', '.join(header)
