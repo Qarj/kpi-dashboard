@@ -1,0 +1,11 @@
+step:               Create a 'regression' KPI using edit form
+url:                http://localhost/kpi/summary/edit/regression/
+postbody:           username=my_username%3Acompany&secret=my_secret&queue_url=http%3A%2F%2Flocalhost%2Fkpi%2Fsummary%2Fadobe_fake_api%2F%3Fmethod%3DReport.Queue&queue_body=%7B%0D%0A++++%22reportDescription%22%3A%7B%0D%0A++++++++%22reportSuiteID%22%3A%22my-brand-id%22%2C%0D%0A++++++++%22dateFrom%22%3A%22%7BDATE_FROM%7D%22%2C%0D%0A++++++++%22dateTo%22%3A%22%7BDATE_TO%7D%22%2C%0D%0A++++++++%22dateGranularity%22%3A%22day%22%2C%0D%0A++++++++%22metrics%22%3A%5B%0D%0A++++++++++++%7B%0D%0A++++++++++++++++%22id%22%3A%22visits%22%0D%0A++++++++++++%7D%0D%0A++++++++%5D%0D%0A++++%7D%0D%0A%7D&get_url=http%3A%2F%2Flocalhost%2Fkpi%2Fsummary%2Fadobe_fake_api%2F%3Fmethod%3DReport.Get&get_body=%7B%0D%0A++++%22reportID%22%3A12345%0D%0A%7D%0D%0A&report_period_days=7
+verifypositive1:    written to database ok
+verifypositive2:    API Secret updated
+
+step:               Get table for KPI 'regression'
+url:                http://localhost/kpi/summary/table/regression/?debug=true
+verifypositive1:    7 days table view for KPI regression
+verifypositive2:    Queue Response
+

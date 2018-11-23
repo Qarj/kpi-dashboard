@@ -9,6 +9,9 @@ from .models import Dash
 from .forms import EditForm
 from django.views.decorators.csrf import csrf_exempt
 
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
 from datetime import datetime, date, timedelta
 import random, json, hashlib, string, binascii
 
@@ -43,12 +46,21 @@ def adobe_fake_api(request):
     if request.method != 'POST':
         return HttpResponse('Must be a post request')
 
+    method = request.GET.get('method', None)
     api_request = json.loads(request.body.decode("utf-8"))
-    target_date = api_request['reportDescription']['date']
 
-    random.seed(target_date)
+    if method == 'Report.Get':
+        report_id = api_request['reportID']
+        random.seed(report_id)
+        return HttpResponse( '{"visits":"' + str(random.randrange(100_000, 250_000)) + '"}' )
 
-    return HttpResponse('"visits":"' + str(random.randrange(100_000, 250_000)) + '"')
+    if method == 'Report.Queue':
+        date_from = api_request['reportDescription']['dateFrom']
+        date_to = api_request['reportDescription']['dateTo']
+        random.seed(date_from)
+        return HttpResponse( '{"reportID":' + str(random.randrange(1_000_000, 9_999_999)) + '}' )
+
+    return HttpResponse( 'Unknown method ' + method + ', I only know Report.Get or Report.Queue' )
 
 @csrf_exempt
 def edit(request, kpi):
@@ -149,6 +161,12 @@ def table(request, kpi):
     xwsse_header = _build_xwsse_header(dash.username, dash.secret)
     content_header = 'application/json'
 
+    external_request = Request(dash.queue_url, dash.queue_body.encode('utf-8'))
+    queue_response_body = urlopen(external_request).read().decode()
+
+    external_request = Request(dash.get_url, dash.get_body.encode('utf-8'))
+    get_response_body = urlopen(external_request).read().decode()
+
     context = {
         'kpi_name': kpi,
         'page_title': page_title,
@@ -156,9 +174,13 @@ def table(request, kpi):
         'date_from': date_from,
         'date_to': date_to,
         'debug': debug,
+        'queue_url': dash.queue_url,
         'queue_body': dash.queue_body,
+        'get_url': dash.get_url,
         'xwsse_header': xwsse_header,
         'content_header': content_header,
+        'queue_response_body': queue_response_body,
+        'get_response_body': get_response_body,
     }
 
     return render(request, 'summary/table.html', context)

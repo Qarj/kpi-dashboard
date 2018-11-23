@@ -60,35 +60,38 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Nonce component
         - [x] Created component
     - [x] Table view shows content type header in ?debug=true mode
+    - [x] Table shows Queue URL in debug mode
+    - [x] Table shows Get URL in debug mode
+    - [ ] Table shows Report.Get body in debug mode
     - [x] Table view has message if kpi is unknown
     - [ ] Request data for date range
-        - [ ] Calculate dateFrom and dateTo
-        - [ ] Substitute dateFrom, dateTo and reportSuiteID into Queue Body
-        - [ ] Generate WSSE header
-        - [ ] Post to Queue URL
+        - [x] Calculate dateFrom and dateTo
+        - [x] Substitute dateFrom, dateTo into Queue Body
+        - [x] Generate WSSE header
+        - [x] Post to Queue URL
             - [ ] Remember Report id (does not need to be put in DB)
-        - [ ] Post to Get
+        - [ ] Post to Get with response from Queue
             - [ ] Parse Adobe response into array
         - [ ] Return page with JavaScript graphing library pointing to array
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
         - [ ] Must have content type header `Content-Type: application/json`
-        - [ ] Must have X-WSSE header `X-WSSE: UsernameToken Username="user:company", PasswordDigest="123==", Nonce="0b6f", Created="2018-11-19T03:01:29Z"`
-        - [ ] Should return JSON object when posting to Queue
-        - [ ] Should return Report ID `{"reportID":3582786221}`
+        - [x] Should return JSON object when posting to Queue
+        - [x] Should return Report ID `{"reportID":3582786221}`
     - method=Report.Get
-        - [ ] Post reportID `{"reportID":3582786221}`
-        - [ ] Must have content type headaer
-        - [ ] Should return JSON Object
+        - [x] Post reportID `{"reportID":3582786221}`
+        - [x] Should return JSON Object
         - [ ] Should return a count for each day
         - [ ] Different random number for each day
         - [ ] Totals value is correct
         - [ ] Visits returned per day should be in range 100k to 200k
     - any method
+        - [ ] Must have content type headaer
         - [ ] Presence of Username validated, if not present, actual error message returned
         - [ ] Presence of PasswordDigest validated, if not present, actual error message returned
         - [ ] Presence of Nonce validated, if not present, actual error message returned
         - [ ] Presence of Created validated, if not present, actual error message returned
+        - [ ] Must have X-WSSE header `X-WSSE: UsernameToken Username="user:company", PasswordDigest="123==", Nonce="0b6f", Created="2018-11-19T03:01:29Z"`
         - [ ] Created should not be more than 5 mins in the future, if it is, actual error message returned
         - [ ] Created should not be more than 5 mins in the past, if it is, actual error message returned
         - [ ] Must have `Content-Type: application/json` header, else actual error message returned

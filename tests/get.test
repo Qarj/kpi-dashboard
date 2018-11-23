@@ -1,0 +1,12 @@
+step:               Post Report.Get
+url:                http://localhost/kpi/summary/adobe_fake_api/?method=Report.Get
+postbody:///:   ///
+{
+    "reportID":12345
+}
+///
+verifypositive:     {"visits":"\d+"}
+parseresponseJSON:  (\{.*})
+
+step:               Reponse Body {JSON}
+

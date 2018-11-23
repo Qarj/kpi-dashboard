@@ -30,12 +30,13 @@ def kpi_date(offset):
 
 #target_date = '9999-99-99'
     
-def build_visits_body(target_date):
+def build_report_queue_request_body(from_date, to_date):
     return \
 {
     "reportDescription":{
         "reportSuiteID":"my_brand",
-        "date":target_date,
+        "dateFrom":from_date,
+        "dateTo":to_date,
         "dateGranularity":"day",
         "metrics":[
             {
@@ -43,6 +44,12 @@ def build_visits_body(target_date):
             }
         ]
     }
+}
+
+def build_report_get_request_body(report_id):
+    return \
+{
+    "reportID":report_id
 }
 
 class KPIIndexViewTests(TestCase):
@@ -79,7 +86,7 @@ class KPISummaryTests(TestCase):
         return my_reverse('summary:edit', kwargs=kwargs)
 
     def submit_edit(self, kpi, username='default_username', report_period_days=7, secret='default_secret',
-                    queue_url='http://default_queue',
+                    queue_url='http://localhost/kpi/summary/adobe_fake_api/?method=Report.Queue',
                     queue_body="""
 {
     "reportDescription":{
@@ -95,8 +102,8 @@ class KPISummaryTests(TestCase):
     }
 }
 """,
-                    get_url='http://default_get',
-                    get_body='default get body',
+                    get_url='http://localhost/kpi/summary/adobe_fake_api/?method=Report.Get',
+                    get_body='{"reportID":3582786221}',
                     debug=False):
         body = {
                     'username': username,
@@ -168,19 +175,30 @@ class KPISummaryTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Fake Adobe KPI endpoint')
 
-    def test_adobe_fake_api_returns_JSON_on_POST(self):
-        response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=False)
-        self._assertRegex(response, r'"visits":"\d+"')
+    def test_adobe_fake_api_returns_JSON_on_POST_method_report_queue(self):
+        response = self.adobe_fake_api(build_report_queue_request_body(kpi_date(-2),kpi_date(-1)), method='Report.Queue', debug=False)
+        self._assertRegex(response, r'"\w+":')
+
+    def test_adobe_fake_api_returns_JSON_on_POST_method_report_get(self):
+        response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
+        self._assertRegex(response, r'"\w+":')
 
     def test_adobe_fake_api_returns_message_on_GET(self):
         response = self.client.get(reverse('summary:adobe_fake_api'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Must be a post request')
 
-    def test_adobe_fake_api_returns_random_visits_greater_than_100k(self):
-        response = self.adobe_fake_api(build_visits_body(kpi_date(-1)), method='Report.Run', debug=False)
-        self._assertRegex(response, r'"visits":"\d{5,}"')
+    def test_adobe_fake_api_report_queue_returns_reportID(self):
+        response = self.adobe_fake_api(build_report_queue_request_body(kpi_date(-2),kpi_date(-1)), method='Report.Queue', debug=False)
+        self._assertRegex(response, r'{"reportID":\d+}')
 
+    def test_adobe_fake_api_returns_random_visits_greater_than_100k(self):
+        response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
+        self._assertRegex(response, r'{"visits":"\d{5,}"}')
+
+    def test_adobe_fake_api_returns_message_when_method_unknown(self):
+        response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Sing', debug=False)
+        self.assertContains(response, 'Unknown method')
 
     #
     # Create / Edit KPI form
@@ -360,14 +378,33 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'Created=')
 
     def test_get_kpi_table_shows_content_type_header_in_debug_mode(self):
-        response = self.submit_edit(kpi='content_type', username="my:user", debug=False)
+        response = self.submit_edit(kpi='content_type', debug=False)
         response = self.get_table(kpi='content_type', debug=False)
         self.assertContains(response, 'application/json')
+
+    def test_get_kpi_table_shows_queue_url_in_debug_mode(self):
+        response = self.submit_edit(kpi='queue_url', debug=False)
+        response = self.get_table(kpi='queue_url', debug=False)
+        self.assertContains(response, 'method=Report.Queue')
+
+    def test_get_kpi_table_shows_get_url_in_debug_mode(self):
+        response = self.submit_edit(kpi='get_url', debug=False)
+        response = self.get_table(kpi='get_url', debug=False)
+        self.assertContains(response, 'method=Report.Get')
 
     def test_get_kpi_table_shows_message_when_kpi_not_defined(self):
         response = self.get_table(kpi='unknown_kpi_definition', debug=False)
         self.assertContains(response, 'unknown_kpi_definition has not been defined')
 
+    def test_get_kpi_table_shows_queue_post_response_in_debug_mode(self):
+        response = self.submit_edit(kpi='queue_post', debug=False)
+        response = self.get_table(kpi='queue_post', debug=False)
+        self._assertRegex(response, r'reportID&quot;:\d+')
+
+    def test_get_kpi_table_shows_get_post_response_in_debug_mode(self):
+        response = self.submit_edit(kpi='queue_get', debug=False)
+        response = self.get_table(kpi='queue_get', debug=False)
+        self._assertRegex(response, r'visits&quot;:&quot;\d+')
 
 # Tests
 # - Create/Edit dashboard
