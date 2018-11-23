@@ -64,7 +64,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [x] Table shows Get URL in debug mode
     - [ ] Table shows Report.Get body in debug mode
     - [x] Table view has message if kpi is unknown
-    - [ ] Request data for date range
+    - [ ] Table - request data for date range
         - [x] Calculate dateFrom and dateTo
         - [x] Substitute dateFrom, dateTo into Queue Body
         - [x] Generate WSSE header
@@ -72,6 +72,8 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
             - [ ] Remember Report id (does not need to be put in DB)
         - [ ] Post to Get with response from Queue
             - [ ] Parse Adobe response into array
+        - [ ] Show table response, one table row per day
+    
         - [ ] Return page with JavaScript graphing library pointing to array
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
