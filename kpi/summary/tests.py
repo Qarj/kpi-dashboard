@@ -160,7 +160,12 @@ class KPISummaryTests(TestCase):
 
     def _assertNotRegex(self, response, regex):
         self.assertNotRegex(response.content.decode('utf-8'), regex)
-        
+
+    def _assertCount(self, response, string, expectCount):
+        actualCount = response.content.decode('utf-8').count(string)
+        message = 'Expected to find ' + string + ' ' + str(expectCount) + ' times, but found ' + str(actualCount) + ' times'
+        self.assertEqual(expectCount, actualCount, msg=message)
+
 
     #
     # Tests start here
@@ -194,11 +199,16 @@ class KPISummaryTests(TestCase):
 
     def test_adobe_fake_api_returns_random_visits_greater_than_100k(self):
         response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
-        self._assertRegex(response, r'{"visits":"\d{5,}"}')
+        self._assertRegex(response, r'"counts":\[\s*"\d{5,}"')
 
     def test_adobe_fake_api_returns_message_when_method_unknown(self):
         response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Sing', debug=False)
         self.assertContains(response, 'Unknown method')
+
+    def test_adobe_fake_api_returns_metrics_response_body_similar_to_real_one(self):
+        response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
+        self.assertContains(response, '"metrics":[')
+
 
     #
     # Create / Edit KPI form
@@ -404,7 +414,22 @@ class KPISummaryTests(TestCase):
     def test_get_kpi_table_shows_get_post_response_in_debug_mode(self):
         response = self.submit_edit(kpi='queue_get', debug=False)
         response = self.get_table(kpi='queue_get', debug=False)
-        self._assertRegex(response, r'visits&quot;:&quot;\d+')
+        self._assertRegex(response, r'counts&quot;:\[\s*&quot;\d{5,}')
+
+    def test_queue_response_used_for_get_not_stored_get_body(self):
+        response = self.submit_edit(kpi='queue_get', get_body='this is malformed', debug=False)
+        response = self.get_table(kpi='queue_get', debug=False)
+        self._assertRegex(response, r'counts&quot;:\[\s*&quot;\d{5,}')
+
+    def test_get_kpi_table_has_multiple_counts_in_get_report_response(self):
+        response = self.submit_edit(kpi='multi', report_period_days='2', debug=False)
+        response = self.get_table(kpi='multi', debug=False)
+        self._assertCount(response, '&quot;counts&quot;', 2)
+
+    def test_get_kpi_table_has_multiple_counts_in_get_report_response(self):
+        response = self.submit_edit(kpi='multi', report_period_days='3', debug=False)
+        response = self.get_table(kpi='multi', debug=False)
+        self._assertCount(response, '&quot;counts&quot;', 3)
 
 # Tests
 # - Create/Edit dashboard

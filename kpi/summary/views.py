@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import Dash
+from .models import Queue
 from .forms import EditForm
 from django.views.decorators.csrf import csrf_exempt
 
@@ -13,6 +14,9 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from datetime import datetime, date, timedelta
+import pytz
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import is_aware, make_aware
 import random, json, hashlib, string, binascii
 
 def index(request):
@@ -51,16 +55,109 @@ def adobe_fake_api(request):
 
     if method == 'Report.Get':
         report_id = api_request['reportID']
-        random.seed(report_id)
-        return HttpResponse( '{"visits":"' + str(random.randrange(100_000, 250_000)) + '"}' )
+        try:
+            queue = Queue.objects.get(report_id=report_id)
+        except Queue.DoesNotExist:
+            print ('REPORT_ID does not EXIST in Queue - EXCEPTION PROCESSING NEEDS IMPLEMENTATION')
+            queue = Queue( report_id = '123456' )
+            queue.metric = 'dummy_metric'
+            queue.date_from = _get_aware_datetime_from_YYYY_MM_DD('2018-10-29')
+            queue.date_to = _get_aware_datetime_from_YYYY_MM_DD('2018-10-30')
+#        random.seed(report_id)
+#        return HttpResponse( '{"visits":"' + str(random.randrange(100_000, 250_000)) + '"}' )
+        return HttpResponse( _build_metrics_response(queue.date_from, queue.date_to, queue.metric_id) )
+
+    utc=pytz.UTC
+    today_aware = utc.localize(datetime.today()) 
 
     if method == 'Report.Queue':
-        date_from = api_request['reportDescription']['dateFrom']
-        date_to = api_request['reportDescription']['dateTo']
-        random.seed(date_from)
-        return HttpResponse( '{"reportID":' + str(random.randrange(1_000_000, 9_999_999)) + '}' )
+        report_id = str(random.randrange(1_000_000, 999_999_999))
+        queue = Queue( report_id = report_id )
+        queue.date_from = _get_aware_datetime_from_YYYY_MM_DD(api_request['reportDescription']['dateFrom'])
+        queue.date_to = _get_aware_datetime_from_YYYY_MM_DD(api_request['reportDescription']['dateTo'])
+        queue_metric_id = api_request['reportDescription']['metrics'][0]['id']
+        queue.report_suite_id = api_request['reportDescription']['reportSuiteID']
+        queue.date_granularity = api_request['reportDescription']['dateGranularity']
+        queue.save()
+        _remove_stale_queued_reports( today_aware - timedelta(minutes=10) )
+#        Queue.objects.filter( date_created__lte = today_aware - timedelta(minutes=10) ).delete()
+#        random.seed(date_from)
+        return HttpResponse( '{"reportID":' + report_id + '}' )
 
     return HttpResponse( 'Unknown method ' + method + ', I only know Report.Get or Report.Queue' )
+
+def _get_aware_datetime_from_YYYY_MM_DD(date_str):
+    my_date = parse_datetime(date_str+'T12:00:00')
+    if not is_aware(my_date):
+        my_date = make_aware(my_date)
+    return my_date
+
+def _remove_stale_queued_reports(old_records):
+    Queue.objects.filter( date_created__lte = old_records ).delete()
+
+def _build_metrics_response(date_from, date_to, metric_id):
+    counts_data_template = """
+         {
+            "name":"Mon. 19 Nov. 2018",
+            "year":2018,
+            "month":11,
+            "day":19,
+            "counts":[
+               "123456"
+            ]
+         }
+"""
+    metrics_response_template = """
+{
+   "report":{
+      "type":"overtime",
+      "elements":[
+         {
+            "id":"datetime",
+            "name":"Date"
+         }
+      ],
+      "reportSuite":{
+         "id":"my-brand-id",
+         "name":"Example Website"
+      },
+      "period":"Mon. 19 Nov. 2018 - Mon. 19 Nov. 2018",
+      "metrics":[
+         {
+            "id":"visits",
+            "name":"Visits",
+            "type":"number",
+            "decimals":0,
+            "latency":1577,
+            "current":false
+         }
+      ],
+      "data":[
+         {COUNTS_DATA}
+      ],
+      "totals":[
+         "135010"
+      ],
+      "version":"1.4.18.10"
+   },
+   "waitSeconds":0,
+   "runSeconds":0
+}
+"""
+    delta = date_to - date_from
+    print ('from, to, delta_days:', date_from, date_to, delta.days)
+    counts_data = ''
+    for i in range(1, delta.days+2):
+        print ('i is now', i)
+        counts_data += counts_data_template
+        if i < delta.days:
+            counts_data += '        ,'
+
+    print ('counts_data is', counts_data)
+
+#    counts_data = counts_data_template + ',' + counts_data_template
+    metrics_response = metrics_response_template.replace('{COUNTS_DATA}', counts_data)
+    return metrics_response
 
 @csrf_exempt
 def edit(request, kpi):
@@ -164,7 +261,8 @@ def table(request, kpi):
     external_request = Request(dash.queue_url, dash.queue_body.encode('utf-8'))
     queue_response_body = urlopen(external_request).read().decode()
 
-    external_request = Request(dash.get_url, dash.get_body.encode('utf-8'))
+#    external_request = Request(dash.get_url, dash.get_body.encode('utf-8'))
+    external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
     get_response_body = urlopen(external_request).read().decode()
 
     context = {

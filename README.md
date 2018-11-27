@@ -45,6 +45,55 @@ Example response:
 {"reportID":3582786221}
 ```
 
+Note that the Content-Type of `application/json` doesn't seem to be required, posting with `application/x-www-form-urlencoded`
+seems to work also.
+
+
+X-WSSE present, but with typo - Usergame
+```
+{
+   "error":"Bad Request",
+   "error_description":"Authentication key not found",
+   "error_uri":null
+}
+```
+
+X-WSSE token not present
+```
+{
+   "error":"Bad Request",
+   "error_description":"Invalid authentication credentials.",
+   "error_uri":null
+}
+```
+
+PasswortDigest, or Ponce, 
+```
+{  
+   "error":"Bad Request",
+   "error_description":"Unable to validate authentication.",
+   "error_uri":null
+}
+```
+
+Creates instead of Created 
+```
+{  
+   "error":"Bad Request",
+   "error_description":"Invalid created timestamp (''). Values should be in ISO-8601 format",
+   "error_uri":null
+}
+```
+
+Created time out of sync
+```
+{
+   "error":"Bad Request",
+   "error_description":"The specified created timestamp ('2018-11-22T23:22:12Z') has expired or is in the future",
+   "error_uri":null
+}
+```
+
 
 ### Get request
 
