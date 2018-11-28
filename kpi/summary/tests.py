@@ -443,7 +443,7 @@ class KPISummaryTests(TestCase):
         response = self.get_table(kpi='different', debug=False)
         match = re.search(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8'))
         capture = match.group(1)
-        self._assertCount(response, capture, 1)
+        self._assertCount(response, capture, 2) # in twice - once in raw response data, once in main table
 
     def test_get_kpi_table_total_is_sum_of_counts(self):
         response = self.submit_edit(kpi='different', report_period_days='3', debug=False)
@@ -505,6 +505,23 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
         response = self.get_table(kpi='data_date', debug=False)
         self.assertContains(response, 'name&quot;:&quot;Visits')
+
+    def test_get_kpi_table_shows_kpi_value_for_each_day(self):
+        date_1 = date.today() - timedelta(2)
+        date_2 = date.today() - timedelta(1)
+        date_1_string = date_1.strftime('%a. %d %b. %Y') # Tue. 20 Nov. 2018
+        date_2_string = date_2.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
+        response = self.submit_edit(kpi='each_day', report_period_days='2', debug=False)
+        response = self.get_table(kpi='each_day', debug=False)
+        self.assertContains(response, 'metric_date_1">' + date_1_string)
+        self.assertContains(response, 'metric_date_2">' + date_2_string)
+        counts = []
+        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+            capture = match.group(1)
+            counts.append(capture)
+        self.assertContains(response, 'metric_value_1">' + counts[0])
+        self.assertContains(response, 'metric_value_2">' + counts[1])
+
 
 #    m = re.search(r'Result at: ([^\s]*)', result_stdout)
 #    if (m):

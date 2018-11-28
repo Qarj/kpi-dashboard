@@ -54,6 +54,17 @@
         </tr>
     </table>
 
+    <br />
+
 {% endif %}
+
+    <table id="metric_values_table" >
+    {% for metric in metrics %}
+        <tr>
+            <td name="metric_date_{{ metric.number }}">{{ metric.date }}</td>
+            <td name="metric_value_{{ metric.number }}">{{ metric.value }}</td>
+        </tr>
+    {% endfor %}
+    </table>
 
 {% endblock %}

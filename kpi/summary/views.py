@@ -157,7 +157,7 @@ def _build_metrics_response(date_from, date_to, metric_id):
         count_data = count_data.replace( '{MONTH}', month )
         count_data = count_data.replace( '{DAY}', day )
         counts_data += count_data
-        if i < delta.days:
+        if i <= delta.days:
             counts_data += '        ,'
         metric_date += timedelta(1)
 
@@ -280,6 +280,18 @@ def table(request, kpi):
 #    external_request = Request(dash.get_url, dash.get_body.encode('utf-8'))
     external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
     get_response_body = urlopen(external_request).read().decode()
+#    get_response_body_raw = urlopen(external_request)
+    response_json = json.loads(get_response_body)
+
+    number = 0
+    metrics = []
+    for datum in response_json['report']['data']:
+        number += 1
+        metrics.append ( {
+            'number': str(number),
+            'value': datum['counts'][0],
+            'date': datum['name'],
+        } )
 
     context = {
         'kpi_name': kpi,
@@ -295,7 +307,9 @@ def table(request, kpi):
         'content_header': content_header,
         'queue_response_body': queue_response_body,
         'get_response_body': get_response_body,
+        'metrics': metrics,
     }
+
 
     return render(request, 'summary/table.html', context)
 
