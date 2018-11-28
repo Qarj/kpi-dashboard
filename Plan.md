@@ -68,7 +68,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Substitute dateFrom, dateTo into Queue Body
         - [x] Generate WSSE header
         - [x] Post to Queue URL
-            - [ ] Remember Report id reponse (does not need to be put in DB)
+            - [x] Remember Report id reponse (does not need to be put in DB)
         - [x] Post to Get with response from Queue
             - [ ] Parse Adobe response into array
         - [ ] Show table response, one table row per day
@@ -83,16 +83,16 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Post reportID `{"reportID":3582786221}`
         - [x] Should return JSON Object
         - [x] Should return a JSON Object like the real one - for one day with visits count 123456
-        - [ ] Should return a count for each day - for multiple days
-        - [ ] Different random number for each day
-        - [ ] Totals value is correct
-        - [ ] Visits returned per day should be in range 100k to 200k
-        - [ ] Period from date is correct
-        - [ ] Period to date is correct
-        - [ ] Metrics id is correct
-        - [ ] Metrics name matches id with first letter capital
-        - [ ] Date name in data is correct
-        - [ ] Date year, month and day in data is correct
+        - [x] Should return a count for each day - for multiple days
+        - [x] Different random number for each day
+        - [x] Totals value is correct
+        - [x] Visits returned per day should be in range 100k to 250k (no test)
+        - [x] Period from date is correct
+        - [x] Period to date is correct
+        - [x] Date name in data is correct
+        - [x] Date year, month and day in data is correct
+        - [x] Metrics id is correct
+        - [x] Metrics name matches id with first letter capital
     - any method
         - [ ] Must have content type headaer
         - [ ] Presence of Username validated, if not present, actual error message returned

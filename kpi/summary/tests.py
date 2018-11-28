@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.http import urlencode
 from datetime import date, timedelta
-import json
+import json, re
 
 #
 # Test Helpers
@@ -34,7 +34,7 @@ def build_report_queue_request_body(from_date, to_date):
     return \
 {
     "reportDescription":{
-        "reportSuiteID":"my_brand",
+        "reportSuiteID":"fake-adobe-suite-id",
         "dateFrom":from_date,
         "dateTo":to_date,
         "dateGranularity":"day",
@@ -209,6 +209,13 @@ class KPISummaryTests(TestCase):
         response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
         self.assertContains(response, '"metrics":[')
 
+    def test_adobe_fake_api_returns_metric_id(self):
+        response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
+        self.assertContains(response, 'dummy_metric')
+
+    def test_adobe_fake_api_returns_metric_name(self):
+        response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
+        self.assertContains(response, 'Dummy_Metric')
 
     #
     # Create / Edit KPI form
@@ -421,15 +428,90 @@ class KPISummaryTests(TestCase):
         response = self.get_table(kpi='queue_get', debug=False)
         self._assertRegex(response, r'counts&quot;:\[\s*&quot;\d{5,}')
 
-    def test_get_kpi_table_has_multiple_counts_in_get_report_response(self):
+    def test_get_kpi_table_has_multiple_counts_in_get_report(self):
         response = self.submit_edit(kpi='multi', report_period_days='2', debug=False)
         response = self.get_table(kpi='multi', debug=False)
         self._assertCount(response, '&quot;counts&quot;', 2)
 
-    def test_get_kpi_table_has_multiple_counts_in_get_report_response(self):
+    def test_get_kpi_table_has_multiple_counts_in_get_report(self):
         response = self.submit_edit(kpi='multi', report_period_days='3', debug=False)
         response = self.get_table(kpi='multi', debug=False)
         self._assertCount(response, '&quot;counts&quot;', 3)
+
+    def test_get_kpi_table_has_different_counts_for_each_day(self):
+        response = self.submit_edit(kpi='different', report_period_days='3', debug=False)
+        response = self.get_table(kpi='different', debug=False)
+        match = re.search(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8'))
+        capture = match.group(1)
+        self._assertCount(response, capture, 1)
+
+    def test_get_kpi_table_total_is_sum_of_counts(self):
+        response = self.submit_edit(kpi='different', report_period_days='3', debug=False)
+        response = self.get_table(kpi='different', debug=False)
+        total = 0
+        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+            capture = match.group(1)
+            total += int(capture)
+        self._assertCount(response, str(total), 1)
+
+    def test_get_kpi_table_period_from_date_is_correct(self):
+        period_from_date = date.today() - timedelta(3)
+        period_from_date_string = period_from_date.strftime('%a. %d %b. %Y') # Mon. 19 Nov. 2018
+        response = self.submit_edit(kpi='period_from', report_period_days='3', debug=False)
+        response = self.get_table(kpi='period_from', debug=False)
+        self.assertContains(response, period_from_date_string)
+
+    def test_get_kpi_table_period_to_date_is_correct(self):
+        period_to_date = date.today() - timedelta(1)
+        period_to_date_string = period_to_date.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
+        response = self.submit_edit(kpi='period_to', report_period_days='3', debug=False)
+        response = self.get_table(kpi='period_to', debug=False)
+        self.assertContains(response, period_to_date_string)
+
+    def test_get_kpi_table_data_name_date_is_correct(self):
+        date_1 = date.today() - timedelta(2)
+        date_2 = date.today() - timedelta(1)
+        date_1_string = date_1.strftime('%a. %d %b. %Y') # Tue. 20 Nov. 2018
+        date_2_string = date_2.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
+        response = self.submit_edit(kpi='data_name_date', report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_name_date', debug=False)
+        self.assertContains(response, 'name&quot;:&quot;' + date_1_string)
+        self.assertContains(response, 'name&quot;:&quot;' + date_2_string)
+
+    def test_get_kpi_table_data_year_month_day_is_correct(self):
+        date_1 = date.today() - timedelta(2)
+        date_2 = date.today() - timedelta(1)
+        date_1_year = date_1.strftime('%Y') # 2018
+        date_1_month = str(int(date_1.strftime('%m'))) # lose leading zero
+        date_1_day = str(int(date_1.strftime('%d'))) # lose leading zero
+        date_2_year = date_1.strftime('%Y') # 2018
+        date_2_month = str(int(date_1.strftime('%m'))) # lose leading zero
+        date_2_day = str(int(date_1.strftime('%d'))) # lose leading zero
+        response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_date', debug=False)
+        self.assertContains(response, 'year&quot;:' + date_1_year)
+        self.assertContains(response, 'month&quot;:' + date_1_month)
+        self.assertContains(response, 'day&quot;:' + date_1_day)
+        self.assertContains(response, 'year&quot;:' + date_2_year)
+        self.assertContains(response, 'month&quot;:' + date_2_month)
+        self.assertContains(response, 'day&quot;:' + date_2_day)
+
+    def test_get_kpi_table_data_metric_id_is_correct(self):
+        response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_date', debug=False)
+        self.assertContains(response, 'id&quot;:&quot;visits')
+
+    def test_get_kpi_table_data_metric_name_is_correct(self):
+        response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_date', debug=False)
+        self.assertContains(response, 'name&quot;:&quot;Visits')
+
+#    m = re.search(r'Result at: ([^\s]*)', result_stdout)
+#    if (m):
+#        return m.group(1)
+#    else:
+#        return '/DEV/Summary.xml'
+
 
 # Tests
 # - Create/Edit dashboard

@@ -58,13 +58,11 @@ def adobe_fake_api(request):
         try:
             queue = Queue.objects.get(report_id=report_id)
         except Queue.DoesNotExist:
-            print ('REPORT_ID does not EXIST in Queue - EXCEPTION PROCESSING NEEDS IMPLEMENTATION')
+            #print ('REPORT_ID does not EXIST in Queue - EXCEPTION PROCESSING NEEDS IMPLEMENTATION')
             queue = Queue( report_id = '123456' )
-            queue.metric = 'dummy_metric'
+            queue.metric_id = 'dummy_metric'
             queue.date_from = _get_aware_datetime_from_YYYY_MM_DD('2018-10-29')
             queue.date_to = _get_aware_datetime_from_YYYY_MM_DD('2018-10-30')
-#        random.seed(report_id)
-#        return HttpResponse( '{"visits":"' + str(random.randrange(100_000, 250_000)) + '"}' )
         return HttpResponse( _build_metrics_response(queue.date_from, queue.date_to, queue.metric_id) )
 
     utc=pytz.UTC
@@ -75,13 +73,11 @@ def adobe_fake_api(request):
         queue = Queue( report_id = report_id )
         queue.date_from = _get_aware_datetime_from_YYYY_MM_DD(api_request['reportDescription']['dateFrom'])
         queue.date_to = _get_aware_datetime_from_YYYY_MM_DD(api_request['reportDescription']['dateTo'])
-        queue_metric_id = api_request['reportDescription']['metrics'][0]['id']
+        queue.metric_id = api_request['reportDescription']['metrics'][0]['id']
         queue.report_suite_id = api_request['reportDescription']['reportSuiteID']
         queue.date_granularity = api_request['reportDescription']['dateGranularity']
         queue.save()
         _remove_stale_queued_reports( today_aware - timedelta(minutes=10) )
-#        Queue.objects.filter( date_created__lte = today_aware - timedelta(minutes=10) ).delete()
-#        random.seed(date_from)
         return HttpResponse( '{"reportID":' + report_id + '}' )
 
     return HttpResponse( 'Unknown method ' + method + ', I only know Report.Get or Report.Queue' )
@@ -96,14 +92,14 @@ def _remove_stale_queued_reports(old_records):
     Queue.objects.filter( date_created__lte = old_records ).delete()
 
 def _build_metrics_response(date_from, date_to, metric_id):
-    counts_data_template = """
+    count_data_template = """
          {
-            "name":"Mon. 19 Nov. 2018",
-            "year":2018,
-            "month":11,
-            "day":19,
+            "name":"{NAME_DATE}",
+            "year":{YEAR},
+            "month":{MONTH},
+            "day":{DAY},
             "counts":[
-               "123456"
+               "{COUNT}"
             ]
          }
 """
@@ -118,14 +114,14 @@ def _build_metrics_response(date_from, date_to, metric_id):
          }
       ],
       "reportSuite":{
-         "id":"my-brand-id",
-         "name":"Example Website"
+         "id":"fake-adobe-analytics-api",
+         "name":"Fake Adobe Analytics API"
       },
-      "period":"Mon. 19 Nov. 2018 - Mon. 19 Nov. 2018",
+      "period":"{PERIOD_FROM_DATE} - {PERIOD_TO_DATE}",
       "metrics":[
          {
-            "id":"visits",
-            "name":"Visits",
+            "id":"{METRIC_ID}",
+            "name":"{METRIC_NAME}",
             "type":"number",
             "decimals":0,
             "latency":1577,
@@ -136,7 +132,7 @@ def _build_metrics_response(date_from, date_to, metric_id):
          {COUNTS_DATA}
       ],
       "totals":[
-         "135010"
+         "{TOTAL}"
       ],
       "version":"1.4.18.10"
    },
@@ -145,19 +141,39 @@ def _build_metrics_response(date_from, date_to, metric_id):
 }
 """
     delta = date_to - date_from
-    print ('from, to, delta_days:', date_from, date_to, delta.days)
     counts_data = ''
+    total = 0
+    metric_date = date_from
     for i in range(1, delta.days+2):
-        print ('i is now', i)
-        counts_data += counts_data_template
+        count = _random_count()
+        total += int(count)
+        count_data = count_data_template.replace( '{COUNT}', count )
+        name_date = metric_date.strftime('%a. %d %b. %Y')
+        year = metric_date.strftime('%Y')
+        month = str(int(metric_date.strftime('%m')))
+        day = str(int(metric_date.strftime('%d')))
+        count_data = count_data.replace( '{NAME_DATE}', name_date )
+        count_data = count_data.replace( '{YEAR}', year )
+        count_data = count_data.replace( '{MONTH}', month )
+        count_data = count_data.replace( '{DAY}', day )
+        counts_data += count_data
         if i < delta.days:
             counts_data += '        ,'
+        metric_date += timedelta(1)
 
-    print ('counts_data is', counts_data)
+    period_from_date = date_from.strftime('%a. %d %b. %Y')
+    period_to_date = date_to.strftime('%a. %d %b. %Y')
 
-#    counts_data = counts_data_template + ',' + counts_data_template
     metrics_response = metrics_response_template.replace('{COUNTS_DATA}', counts_data)
+    metrics_response = metrics_response.replace('{TOTAL}', str(total))
+    metrics_response = metrics_response.replace('{PERIOD_FROM_DATE}', period_from_date)
+    metrics_response = metrics_response.replace('{PERIOD_TO_DATE}', period_to_date)
+    metrics_response = metrics_response.replace('{METRIC_ID}', metric_id)
+    metrics_response = metrics_response.replace('{METRIC_NAME}', metric_id.title())
     return metrics_response
+
+def _random_count():
+    return str( random.randrange(100_000, 270_000) )
 
 @csrf_exempt
 def edit(request, kpi):
