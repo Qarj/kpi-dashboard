@@ -17,7 +17,7 @@ from datetime import datetime, date, timedelta
 import pytz
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
-import random, json, hashlib, string, binascii
+import time, random, json, hashlib, string, binascii
 
 def index(request):
     page_title = "KPI Dashboard"
@@ -296,15 +296,25 @@ def table(request, kpi):
     content_header = 'application/json'
 
     external_request = Request(dash.queue_url, dash.queue_body.encode('utf-8'))
+    external_request.add_header('X-WSSE', xwsse_header)
+    external_request.add_header('Content-Type', content_header)
     queue_response_body = urlopen(external_request).read().decode()
-        
+    print (queue_response_body)
+    
+    delay = 2
+    if 'http://localhost' in dash.get_url:
+        delay = 0 # Fake API always passes on second attempt
     for attempt in range(1,4):
         external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
+        xwsse_header = _build_xwsse_header(dash.username, dash.secret)
+        external_request.add_header('X-WSSE', xwsse_header)
+        external_request.add_header('Content-Type', content_header)
         get_response_body = urlopen(external_request).read().decode()
         response_json = json.loads(get_response_body)
         if 'error' in response_json:
             if response_json['error'] == 'report_not_ready':
-                pass
+                delay = delay * 2
+                time.sleep(delay)
         else:
             break
 

@@ -75,7 +75,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] Handle report not yet ready error
             - [ ] Wait 5 seconds, then try again
                 - [x] for fake urls, wait 0 seconds
-                - [ ] double wait time after each failure
+                - [x] double wait time after each failure
             - [x] Timeout of 3 attempts
     - [ ] Graph
         - [ ] return page with JavaScript graphing library pointing to array
