@@ -57,12 +57,23 @@ def adobe_fake_api(request):
         report_id = api_request['reportID']
         try:
             queue = Queue.objects.get(report_id=report_id)
+            queue.get_requests += 1
+            queue.save()
         except Queue.DoesNotExist:
             #print ('REPORT_ID does not EXIST in Queue - EXCEPTION PROCESSING NEEDS IMPLEMENTATION')
             queue = Queue( report_id = '123456' )
             queue.metric_id = 'dummy_metric'
             queue.date_from = _get_aware_datetime_from_YYYY_MM_DD('2018-10-29')
             queue.date_to = _get_aware_datetime_from_YYYY_MM_DD('2018-10-30')
+            queue.get_requests = 2
+        if queue.get_requests < 2:
+            return HttpResponse ( """
+{
+   "error":"report_not_ready",
+   "error_description":"Report not ready",
+   "error_uri":null
+}
+"""         )
         return HttpResponse( _build_metrics_response(queue.date_from, queue.date_to, queue.metric_id) )
 
     utc=pytz.UTC
@@ -286,12 +297,16 @@ def table(request, kpi):
 
     external_request = Request(dash.queue_url, dash.queue_body.encode('utf-8'))
     queue_response_body = urlopen(external_request).read().decode()
-
-#    external_request = Request(dash.get_url, dash.get_body.encode('utf-8'))
-    external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
-    get_response_body = urlopen(external_request).read().decode()
-#    get_response_body_raw = urlopen(external_request)
-    response_json = json.loads(get_response_body)
+        
+    for attempt in range(1,4):
+        external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
+        get_response_body = urlopen(external_request).read().decode()
+        response_json = json.loads(get_response_body)
+        if 'error' in response_json:
+            if response_json['error'] == 'report_not_ready':
+                pass
+        else:
+            break
 
     number = 0
     metrics = []

@@ -242,6 +242,7 @@ class KPISummaryTests(TestCase):
         response_json = json.loads(response.content.decode('utf-8'))
         report_id = response_json['reportID']
         response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
         self._assertRegex(response, r'"counts":\[\s*"\d{5,}"')
 
     #

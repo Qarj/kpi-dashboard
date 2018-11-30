@@ -74,9 +74,9 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Show table response, one table row per day
         - [ ] Handle report not yet ready error
             - [ ] Wait 5 seconds, then try again
-                - [ ] for fake urls, wait 0 seconds
+                - [x] for fake urls, wait 0 seconds
                 - [ ] double wait time after each failure
-            - [ ] Timeout of 3 attempts
+            - [x] Timeout of 3 attempts
     - [ ] Graph
         - [ ] return page with JavaScript graphing library pointing to array
 - [ ] Create fake Adobe endpoint
@@ -99,9 +99,9 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Metrics id is correct
         - [x] Metrics name matches id with first letter capital
         - [x] Can delete a specifed Report Id (for test purposes)
-        - [ ] Will return a report not ready error on first request (for known report ids)
+        - [x] Will return a report not ready error on first request (for known report ids)
             - [x] Find out what report not ready error looks like
-        - [ ] Will return report on second request
+        - [x] Will return report on second request
     - any method
         - [ ] Must have content type header
         - [ ] Presence of Username validated, if not present, actual error message returned

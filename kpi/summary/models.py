@@ -26,3 +26,5 @@ class Queue(models.Model):
     report_suite_id = models.CharField(max_length=50)
     date_granularity = models.CharField(max_length=10)
     date_created = models.DateTimeField(auto_now_add=True)
+    get_requests = models.IntegerField(default=0)
+
