@@ -80,6 +80,16 @@ def adobe_fake_api(request):
         _remove_stale_queued_reports( today_aware - timedelta(minutes=10) )
         return HttpResponse( '{"reportID":' + report_id + '}' )
 
+    if method == 'Report.Delete':
+        report_id = api_request['reportID']
+        queue = Queue.objects.get(report_id=report_id)
+        try:
+            queue = Queue.objects.get(report_id=report_id)
+        except Queue.DoesNotExist:
+            return HttpResponse( 'Cannot delete a report that does not exist' )
+        queue.delete()
+        return HttpResponse( 'Report deleted OK' )
+
     return HttpResponse( 'Unknown method ' + method + ', I only know Report.Get or Report.Queue' )
 
 def _get_aware_datetime_from_YYYY_MM_DD(date_str):

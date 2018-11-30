@@ -70,10 +70,15 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Post to Queue URL
             - [x] Remember Report id reponse (does not need to be put in DB)
         - [x] Post to Get with response from Queue
-            - [ ] Parse Adobe response into array
-        - [ ] Show table response, one table row per day
-    
-        - [ ] Return page with JavaScript graphing library pointing to array
+            - [x] Parse Adobe response into array
+        - [x] Show table response, one table row per day
+        - [ ] Handle report not yet ready error
+            - [ ] Wait 5 seconds, then try again
+                - [ ] for fake urls, wait 0 seconds
+                - [ ] double wait time after each failure
+            - [ ] Timeout of 3 attempts
+    - [ ] Graph
+        - [ ] return page with JavaScript graphing library pointing to array
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
         - [ ] Must have content type header `Content-Type: application/json`
@@ -93,8 +98,12 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Date year, month and day in data is correct
         - [x] Metrics id is correct
         - [x] Metrics name matches id with first letter capital
+        - [x] Can delete a specifed Report Id (for test purposes)
+        - [ ] Will return a report not ready error on first request (for known report ids)
+            - [x] Find out what report not ready error looks like
+        - [ ] Will return report on second request
     - any method
-        - [ ] Must have content type headaer
+        - [ ] Must have content type header
         - [ ] Presence of Username validated, if not present, actual error message returned
         - [ ] Presence of PasswordDigest validated, if not present, actual error message returned
         - [ ] Presence of Nonce validated, if not present, actual error message returned

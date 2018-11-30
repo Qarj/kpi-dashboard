@@ -215,3 +215,21 @@ Example response:
 }
 ```
 
+Report not ready:
+```
+{
+   "error":"report_not_ready",
+   "error_description":"Report not ready",
+   "error_uri":null
+}
+```
+
+Report id unknown to Adobe:
+```
+{
+   "error":"report_id_invalid",
+   "error_description":"Invalid report ID",
+   "error_uri":null
+}
+```
+

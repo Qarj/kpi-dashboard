@@ -25,7 +25,7 @@ def my_reverse(viewname, kwargs=None, query_kwargs=None):
     return url
 
 def kpi_date(offset):
-    desired_date = date.today() - timedelta(offset)
+    desired_date = date.today() + timedelta(offset)
     return desired_date.strftime("%Y-%m-%d")
 
 #target_date = '9999-99-99'
@@ -217,6 +217,33 @@ class KPISummaryTests(TestCase):
         response = self.adobe_fake_api(build_report_get_request_body(12345), method='Report.Get', debug=False)
         self.assertContains(response, 'Dummy_Metric')
 
+    def test_adobe_fake_api_can_delete_queued_reports(self):
+        response = self.adobe_fake_api(build_report_queue_request_body(kpi_date(-2),kpi_date(-1)), method='Report.Queue', debug=False)
+        response_json = json.loads(response.content.decode('utf-8'))
+        report_id = response_json['reportID']
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
+        self._assertNotRegex(response, 'Dummy_Metric')
+        self._assertRegex(response, r'"counts":\[\s*"\d{5,}"')
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Delete', debug=False)
+        self.assertContains(response, 'Report deleted OK')
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
+        self.assertContains(response, 'Dummy_Metric')
+
+    def test_adobe_fake_api_returns_report_not_ready_on_first_attempt(self):
+        response = self.adobe_fake_api(build_report_queue_request_body(kpi_date(-2),kpi_date(-1)), method='Report.Queue', debug=False)
+        response_json = json.loads(response.content.decode('utf-8'))
+        report_id = response_json['reportID']
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
+        self.assertContains(response, 'report_not_ready')
+
+    def test_adobe_fake_api_returns_report_on_second_attempt(self):
+        response = self.adobe_fake_api(build_report_queue_request_body(kpi_date(-2),kpi_date(-1)), method='Report.Queue', debug=False)
+        response_json = json.loads(response.content.decode('utf-8'))
+        report_id = response_json['reportID']
+        response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
+        self._assertRegex(response, r'"counts":\[\s*"\d{5,}"')
+
     #
     # Create / Edit KPI form
     #
@@ -363,17 +390,17 @@ class KPISummaryTests(TestCase):
     def test_get_kpi_table_datefrom(self):
         response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
         response = self.get_table(kpi='range', debug=False)
-        self.assertContains(response, 'dateFrom">' + kpi_date(2))
+        self.assertContains(response, 'dateFrom">' + kpi_date(-2))
 
     def test_get_kpi_table_dateto(self):
         response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
         response = self.get_table(kpi='range', debug=False)
-        self.assertContains(response, 'dateTo">' + kpi_date(1))
+        self.assertContains(response, 'dateTo">' + kpi_date(-1))
 
     def test_get_kpi_table_dateto(self):
         response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
         response = self.get_table(kpi='range', debug=False)
-        self.assertContains(response, 'dateTo">' + kpi_date(1))
+        self.assertContains(response, 'dateTo">' + kpi_date(-1))
 
     def test_get_kpi_table_debug_info_only_shown_in_debug_mode(self):
         response = self.submit_edit(kpi='debug', report_period_days='2', debug=False)
@@ -384,7 +411,7 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='queue_body', report_period_days='2', debug=False)
         response = self.get_table(kpi='queue_body', debug=False)
         self.assertContains(response, 'dateGranularity')
-        self.assertContains(response, 'dateFrom&quot;:&quot;' + kpi_date(2))
+        self.assertContains(response, 'dateFrom&quot;:&quot;' + kpi_date(-2))
 
     def test_get_kpi_table_shows_x_wsse_header_in_debug_mode(self):
         response = self.submit_edit(kpi='x-wsse_username', username="my:user", debug=False)
