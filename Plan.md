@@ -63,7 +63,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [x] Table shows Queue URL in debug mode
     - [x] Table shows Get URL in debug mode
     - [x] Table view has message if kpi is unknown
-    - [ ] Table - request data for date range
+    - [x] Table - request data for date range
         - [x] Calculate dateFrom and dateTo
         - [x] Substitute dateFrom, dateTo into Queue Body
         - [x] Generate WSSE header
@@ -72,13 +72,44 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Post to Get with response from Queue
             - [x] Parse Adobe response into array
         - [x] Show table response, one table row per day
-        - [ ] Handle report not yet ready error
-            - [ ] Wait 5 seconds, then try again
+        - [x] Handle report not yet ready error
+            - [x] Wait 2 seconds, then try again
                 - [x] for fake urls, wait 0 seconds
                 - [x] double wait time after each failure
             - [x] Timeout of 3 attempts
+    - [ ] Refactor Table so bulk of code can be shared with Graph
     - [ ] Graph
-        - [ ] return page with JavaScript graphing library pointing to array
+        - [x] load chart.bundle.js
+        - [ ] get working with some hard coded dummy data
+        - [ ] real dates are inserted into labels array
+        - [ ] real values are inserted into data array
+        - [ ] kpi_name inserted into label
+    - [ ] Endpoint
+        - [ ] Create endpoint view as a copy of edit
+        - [ ] Remove API Username
+        - [ ] Remove API Secret
+        - [ ] endpoint_name instead of kpi_name
+        - [ ] Strip out Report.Queue - this is now hard coded
+        - [ ] Strip out Report.Get - now hard coded
+        - [ ] Rename report_period_days to default_report_period_days
+        - [ ] Add default_report_suite_id
+        - [ ] Endpoint has its own model separate to the one used by edit (Dash)
+    - [ ] Refactor Edit
+        - [ ] Remove Report.Queue
+        - [ ] Remove Report.Get
+        - [ ] Add default_report_suite_id
+        - [ ] Add default_report_period_days
+        - [ ] Add metric
+    - [ ] Delete Edit feature
+    - [ ] Refactor Table to use new paradigm
+        - [ ] Endpoint defaults to 'prod'
+        - [ ] Endpoint can be changed to 'test' with ?endpoint=test query string parm
+        - [ ] Will first see if kpi_name exists
+            - [ ] If so, use details from it
+            - [ ] If not, use default details from endpoint, assuming that kpi_name == metric_id
+        - [ ] Can put number of days in: summary/table/visits/60 is last 50 days
+        - [ ] Can put date range in: summary/table/visits/20-Oct/10-Nov
+        - [ ] Adobe error messages displayed
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
         - [ ] Must have content type header `Content-Type: application/json`

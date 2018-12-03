@@ -275,6 +275,20 @@ def _process_edit_submit(request, dash):
     return render(request, 'summary/edit_confirmation.html', context, status=http_status)
 
 
+def graph(request, kpi):
+
+    page_title = kpi + ' graph'
+    page_heading = kpi + ' graph'
+
+    context = {
+        'kpi_name': kpi,
+        'page_title': page_title,
+        'page_heading': page_heading,
+    }
+
+    return render(request, 'summary/graph.html', context)
+
+
 def table(request, kpi):
 
     page_title = kpi + ' table'
@@ -299,12 +313,12 @@ def table(request, kpi):
     external_request.add_header('X-WSSE', xwsse_header)
     external_request.add_header('Content-Type', content_header)
     queue_response_body = urlopen(external_request).read().decode()
-    print (queue_response_body)
+#    print (queue_response_body)
     
     delay = 2
     if 'http://localhost' in dash.get_url:
         delay = 0 # Fake API always passes on second attempt
-    for attempt in range(1,4):
+    for attempt in range(1,5):
         external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
         xwsse_header = _build_xwsse_header(dash.username, dash.secret)
         external_request.add_header('X-WSSE', xwsse_header)
@@ -313,8 +327,8 @@ def table(request, kpi):
         response_json = json.loads(get_response_body)
         if 'error' in response_json:
             if response_json['error'] == 'report_not_ready':
-                delay = delay * 2
                 time.sleep(delay)
+                delay = delay * 2
         else:
             break
 

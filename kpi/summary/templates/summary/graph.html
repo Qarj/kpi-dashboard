@@ -1,0 +1,45 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+
+{% load static %}
+<script type="text/javascript" src="{% static 'summary/chart.bundle.js' %}"></script>
+
+    <h2>{{ page_heading }}</h2>
+
+    Not much happening yet!
+
+<canvas id="myChart" width="1200" height="600"></canvas>
+<script>
+var ctx = document.getElementById("myChart").getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["30/06", "01/07", "02/07", "03/07", "04/07", "05/07"],
+        datasets: [{
+            label: '# Visits',
+            data: [366058, 417902, 764677, 741590, 746631, 719865],
+            backgroundColor: [
+                'rgba(255,153,0,0.4)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)'
+            ],
+            borderWidth: 1
+        }, 
+        ]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        },
+        responsive: false
+    }
+});
+</script>
+
+{% endblock %}

@@ -20,6 +20,9 @@ urlpatterns = [
     # ex: /kpi/summary/table/kpi_visits/
     path('table/<kpi>/', views.table, name='table'),
 
+    # ex: /kpi/summary/graph/kpi_visits/
+    path('graph/<kpi>/', views.graph, name='graph'),
+
     # ex: /kpi/summary/canary/
 #    path('canary/', views.canary, name='canary'),
 ]

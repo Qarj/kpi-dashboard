@@ -67,15 +67,18 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    def get_table(self, debug=False, kpi='unknown', page_debug='true'):
-        return self._get_url( self._build_table_url(kpi, page_debug), debug )
+    def get_graph(self, debug=False, kpi='unknown', page_debug='true'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph'), debug)
 
-    def _build_table_url(self, kpi, page_debug):
+    def get_table(self, debug=False, kpi='unknown', page_debug='true'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table'), debug )
+
+    def _build_metric_display_url(self, kpi, page_debug, target_view):
         kwargs={}
         kwargs['kpi'] = kpi
         query_kwargs={}
         query_kwargs['debug'] =  page_debug
-        return my_reverse('summary:table', kwargs=kwargs, query_kwargs=query_kwargs)
+        return my_reverse(target_view, kwargs=kwargs, query_kwargs=query_kwargs)
 
     def get_edit(self, debug=False, kpi='unknown'):
         return self._get_url( self._build_edit_url(kpi), debug )
@@ -550,6 +553,20 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'metric_value_1">' + counts[0])
         self.assertContains(response, 'metric_value_2">' + counts[1])
 
+
+    #
+    # Get KPI data in graph view
+    #
+
+    def test_can_get_kpi_graph_page_with_js_library(self):
+        response = self.submit_edit(kpi='graph', report_period_days='2', debug=False)
+        response = self.get_graph(kpi='graph', debug=False)
+        self.assertContains(response, 'chart.bundle.js')
+
+    def test_can_get_kpi_graph_page_with_a_dummy_graph(self):
+        response = self.submit_edit(kpi='graph', report_period_days='2', debug=False)
+        response = self.get_graph(kpi='graph', debug=False)
+        self.assertContains(response, '366058, 417902')
 
 #    m = re.search(r'Result at: ([^\s]*)', result_stdout)
 #    if (m):
