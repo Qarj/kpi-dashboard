@@ -7,18 +7,16 @@
 
     <h2>{{ page_heading }}</h2>
 
-    Not much happening yet!
-
 <canvas id="myChart" width="1200" height="600"></canvas>
 <script>
 var ctx = document.getElementById("myChart").getContext('2d');
 var myChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ["30/06", "01/07", "02/07", "03/07", "04/07", "05/07"],
+        labels: [{{ graph_dates|safe }}],
         datasets: [{
             label: '# Visits',
-            data: [366058, 417902, 764677, 741590, 746631, 719865],
+            data: [{{ graph_values }}],
             backgroundColor: [
                 'rgba(255,153,0,0.4)'
             ],
@@ -41,5 +39,7 @@ var myChart = new Chart(ctx, {
     }
 });
 </script>
+
+{% include "summary/debug.html" %}
 
 {% endblock %}

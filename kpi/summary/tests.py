@@ -566,7 +566,21 @@ class KPISummaryTests(TestCase):
     def test_can_get_kpi_graph_page_with_a_dummy_graph(self):
         response = self.submit_edit(kpi='graph', report_period_days='2', debug=False)
         response = self.get_graph(kpi='graph', debug=False)
-        self.assertContains(response, '366058, 417902')
+        self._assertRegex(response, r'\d{4,}, \d{4,}')
+
+    def test_get_kpi_graph_shows_kpi_value_for_each_day(self):
+        date_1 = date.today() - timedelta(2)
+        date_2 = date.today() - timedelta(1)
+        date_1_string = str(int(date_1.strftime('%d'))) + '/' + str(int(date_1.strftime('%m')))  # 1/11
+        date_2_string = str(int(date_2.strftime('%d'))) + '/' + str(int(date_2.strftime('%m')))  # 2/11
+        response = self.submit_edit(kpi='each_day', report_period_days='2', debug=False)
+        response = self.get_graph(kpi='each_day', debug=False)
+        self.assertContains(response, '"' + date_1_string + '", "' + date_2_string + '"')
+        counts = []
+        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+            capture = match.group(1)
+            counts.append(capture)
+        self.assertContains(response, counts[0] + ', ' + counts[1])
 
 #    m = re.search(r'Result at: ([^\s]*)', result_stdout)
 #    if (m):

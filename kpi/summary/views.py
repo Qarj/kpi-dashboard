@@ -277,30 +277,49 @@ def _process_edit_submit(request, dash):
 
 def graph(request, kpi):
 
-    page_title = kpi + ' graph'
-    page_heading = kpi + ' graph'
+#    page_title = kpi + ' graph'
+#    page_heading = kpi + ' graph'
 
-    context = {
-        'kpi_name': kpi,
-        'page_title': page_title,
-        'page_heading': page_heading,
-    }
+#    context = {
+#        'kpi_name': kpi,
+#        'page_title': page_title,
+#        'page_heading': page_heading,
+#    }
+
+    context = _get_data_for_kpi (request, kpi, 'graph')
+
+    if 'error_message' in context:
+        return render(request, 'summary/error.html', context)
 
     return render(request, 'summary/graph.html', context)
 
 
 def table(request, kpi):
 
-    page_title = kpi + ' table'
+    context = _get_data_for_kpi (request, kpi, 'table')
+
+    if 'error_message' in context:
+        return render(request, 'summary/error.html', context)
+
+    return render(request, 'summary/table.html', context)
+
+def _get_data_for_kpi(request, kpi, view_type):
+
+    page_title = kpi + ' ' + view_type
 
     try:
         dash = Dash.objects.get(kpi_name=kpi)
     except Dash.DoesNotExist:
-        return render(request, 'summary/error.html', {'page_title': page_title, 'error_message': kpi + ' has not been defined'})
+        context = {
+            'kpi_name': kpi,
+            'page_title': page_title,
+            'error_message':  kpi + ' has not been defined',
+        }
+        return context
 
     debug = request.GET.get('debug', None)
 
-    page_heading = str(dash.report_period_days) + ' days table view for KPI ' + kpi
+    page_heading = str(dash.report_period_days) + ' days ' + view_type + ' view for KPI ' + kpi
 
     date_from = _kpi_date(dash.report_period_days)
     date_to = _kpi_date(1)
@@ -313,8 +332,7 @@ def table(request, kpi):
     external_request.add_header('X-WSSE', xwsse_header)
     external_request.add_header('Content-Type', content_header)
     queue_response_body = urlopen(external_request).read().decode()
-#    print (queue_response_body)
-    
+
     delay = 2
     if 'http://localhost' in dash.get_url:
         delay = 0 # Fake API always passes on second attempt
@@ -333,6 +351,8 @@ def table(request, kpi):
             break
 
     number = 0
+    graph_values = ''
+    graph_dates = ''
     metrics = []
     for datum in response_json['report']['data']:
         number += 1
@@ -341,6 +361,8 @@ def table(request, kpi):
             'value': datum['counts'][0],
             'date': datum['name'],
         } )
+        graph_values += datum['counts'][0] + ', '
+        graph_dates += '"' + str(datum['day']) + '/' + str(datum['month']) + '", '
 
     context = {
         'kpi_name': kpi,
@@ -357,10 +379,11 @@ def table(request, kpi):
         'queue_response_body': queue_response_body,
         'get_response_body': get_response_body,
         'metrics': metrics,
+        'graph_values': graph_values,
+        'graph_dates': graph_dates,
     }
 
-
-    return render(request, 'summary/table.html', context)
+    return context
 
 def _kpi_date(offset):
     desired_date = date.today() - timedelta(offset)

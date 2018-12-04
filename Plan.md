@@ -77,12 +77,12 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
                 - [x] for fake urls, wait 0 seconds
                 - [x] double wait time after each failure
             - [x] Timeout of 3 attempts
-    - [ ] Refactor Table so bulk of code can be shared with Graph
+    - [x] Refactor Table so bulk of code can be shared with Graph
     - [ ] Graph
         - [x] load chart.bundle.js
-        - [ ] get working with some hard coded dummy data
-        - [ ] real dates are inserted into labels array
-        - [ ] real values are inserted into data array
+        - [x] get working with some hard coded dummy data
+        - [x] real dates are inserted into labels array - check with http://127.0.0.1:8000/summary/graph/site_visits_43/?debug=true
+        - [x] real values are inserted into data array
         - [ ] kpi_name inserted into label
     - [ ] Endpoint
         - [ ] Create endpoint view as a copy of edit
