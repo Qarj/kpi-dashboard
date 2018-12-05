@@ -13,6 +13,17 @@ class Dash(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+class Endpoint(models.Model):
+    endpoint_type = models.CharField(max_length=50)
+    username = models.CharField(max_length=50)
+    secret = models.CharField(max_length=50)
+    queue_url = models.CharField(max_length=200)
+    get_url = models.CharField(max_length=200)
+    default_report_suite_id = models.CharField(max_length=50)
+    default_report_period_days = models.IntegerField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
 class KPI(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     value = models.FloatField()

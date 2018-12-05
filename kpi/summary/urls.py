@@ -17,6 +17,9 @@ urlpatterns = [
     # ex: /kpi/summary/edit/kpi_visits/
     path('edit/<kpi>/', views.edit, name='edit'),
 
+    # ex: /kpi/summary/endpoint/test/ ex: /kpi/summary/endpoint/prod/
+    path('endpoint/<type>/', views.endpoint, name='endpoint'),
+
     # ex: /kpi/summary/table/kpi_visits/
     path('table/<kpi>/', views.table, name='table'),
 

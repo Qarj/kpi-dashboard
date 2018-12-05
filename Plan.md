@@ -78,25 +78,25 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
                 - [x] double wait time after each failure
             - [x] Timeout of 3 attempts
     - [x] Refactor Table so bulk of code can be shared with Graph
-    - [ ] Graph
+    - [x] Graph
         - [x] load chart.bundle.js
         - [x] get working with some hard coded dummy data
         - [x] real dates are inserted into labels array - check with http://127.0.0.1:8000/summary/graph/site_visits_43/?debug=true
         - [x] real values are inserted into data array
-        - [ ] kpi_name inserted into label
-    - [ ] Endpoint
-        - [ ] Create endpoint view as a copy of edit
-        - [ ] Remove API Username
-        - [ ] Remove API Secret
-        - [ ] endpoint_name instead of kpi_name
-        - [ ] Strip out Report.Queue - this is now hard coded
-        - [ ] Strip out Report.Get - now hard coded
-        - [ ] Rename report_period_days to default_report_period_days
-        - [ ] Add default_report_suite_id
-        - [ ] Endpoint has its own model separate to the one used by edit (Dash)
+        - [x] kpi_name inserted into label
+    - [x] Endpoint
+        - [x] Create endpoint view as a copy of edit
+        - [x] endpoint_type instead of kpi_name
+        - [x] Strip out Report.Queue - this is now hard coded
+        - [x] Strip out Report.Get - now hard coded
+        - [x] Rename report_period_days to default_report_period_days
+        - [x] Add default_report_suite_id
+        - [x] Endpoint has its own model separate to the one used by edit (Dash)
     - [ ] Refactor Edit
         - [ ] Remove Report.Queue
         - [ ] Remove Report.Get
+        - [ ] Remove API Username
+        - [ ] Remove API Secret
         - [ ] Add default_report_suite_id
         - [ ] Add default_report_period_days
         - [ ] Add metric

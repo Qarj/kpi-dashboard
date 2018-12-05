@@ -15,7 +15,7 @@ var myChart = new Chart(ctx, {
     data: {
         labels: [{{ graph_dates|safe }}],
         datasets: [{
-            label: '# Visits',
+            label: '{{ kpi_name }}',
             data: [{{ graph_values }}],
             backgroundColor: [
                 'rgba(255,153,0,0.4)'

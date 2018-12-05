@@ -83,6 +83,14 @@ class KPISummaryTests(TestCase):
     def get_edit(self, debug=False, kpi='unknown'):
         return self._get_url( self._build_edit_url(kpi), debug )
 
+    def get_endpoint(self, debug=False, type='unknown'):
+        return self._get_url( self._build_endpoint_url(type), debug )
+
+    def _build_endpoint_url(self, type):
+        kwargs={}
+        kwargs['type'] = type
+        return my_reverse('summary:endpoint', kwargs=kwargs)
+
     def _build_edit_url(self, kpi):
         kwargs={}
         kwargs['kpi'] = kpi
@@ -118,6 +126,21 @@ class KPISummaryTests(TestCase):
                     'report_period_days': report_period_days,
         }
         return self._post_url_and_body( self._build_edit_url(kpi), body, debug=debug )
+
+    def submit_endpoint(self, type, username='default_username', default_report_period_days=7, secret='default_secret',
+                    queue_url='http://localhost/kpi/summary/adobe_fake_api/?method=Report.Queue',
+                    get_url='http://localhost/kpi/summary/adobe_fake_api/?method=Report.Get',
+                    default_report_suite_id='test-suite-id',
+                    debug=False):
+        body = {
+                    'username': username,
+                    'secret': secret,
+                    'queue_url': queue_url,
+                    'get_url': get_url,
+                    'default_report_suite_id': default_report_suite_id,
+                    'default_report_period_days': default_report_period_days,
+        }
+        return self._post_url_and_body( self._build_endpoint_url(type), body, debug=debug )
 
     def adobe_fake_api(self, body, debug=False, method=''):
         my_date = '8888-88-88'
@@ -581,6 +604,126 @@ class KPISummaryTests(TestCase):
             capture = match.group(1)
             counts.append(capture)
         self.assertContains(response, counts[0] + ', ' + counts[1])
+
+    def test_kpi_name_in_graph_label(self):
+        response = self.submit_edit(kpi='visits_label', report_period_days='2', debug=False)
+        response = self.get_graph(kpi='visits_label', debug=False)
+        self._assertRegex(response, r'label: .visits_label')
+
+
+    #
+    # endpoint create/edit
+    #
+
+    def test_can_get_endpoint_page(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'Create / Edit Adobe Analytics Endpoint')
+        self.assertContains(response, 'Endpoint test') # title
+        self.assertContains(response, 'Endpoint Type')
+        self.assertContains(response, '>test<')
+
+    def test_endpoint_form_has_username_field(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'username')
+        self.assertContains(response, 'class="narrow-input"')
+        self.assertContains(response, 'API Username')
+
+    def test_endpoint_form_has_secret_field(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'secret')
+        self.assertContains(response, 'API Secret')
+        self.assertContains(response, 'maxlength="50"')
+
+    def test_endpoint_form_has_queue_url(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'queue_url')
+        self.assertContains(response, 'Queue URL')
+        self.assertContains(response, 'maxlength="200"')
+
+    def test_endpoint_form_has_get_url(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'get_url')
+        self.assertContains(response, 'Get URL')
+
+    def test_endpoint_form_has_default_report_suite_id(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'default_report_suite_id')
+        self.assertContains(response, 'Default Report Suite Id')
+
+    def test_endpoint_form_has_default_report_period_days(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'default_report_period_days')
+        self.assertContains(response, 'Default Report Period Days')
+        self.assertContains(response, 'type="number" min="1" max="31"')
+
+    def test_endpoint_form_has_blank_date_created(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'date_created')
+        self.assertContains(response, 'Date Created')
+        self.assertContains(response, 'id="id_date_created"><') # is blank
+
+    def test_endpoint_form_has_blank_date_modified(self):
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'date_modified')
+        self.assertContains(response, 'Date Modified')
+        self.assertContains(response, 'id="id_date_modified"><') # is blank
+
+    def test_endpoint_edit_dashboard_form_for_new_endpoint(self):
+        response = self.submit_endpoint(type='fake', debug=False)
+        self.assertContains(response, 'Endpoint config written to database ok')
+
+    def test_endpoint_api_username_written_to_database(self):
+        response = self.submit_endpoint(type='test', username='my_api_username', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'my_api_username')
+
+    def test_endpoint_api_report_period_days_written_to_database(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='27', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, '"27"')
+
+    def test_endpoint_default_report_suite_id_written_to_database(self):
+        response = self.submit_endpoint(type='test', default_report_suite_id='my-special-id', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'my-special-id')
+
+    def test_endpoint_secret_displays_empty_when_no_data(self):
+        response = self.submit_endpoint(type='test', secret='', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'name="secret" value=""')
+    
+    def test_endpoint_secret_displays_eight_asterix_when_has_data(self):
+        response = self.submit_endpoint(type='test', secret='my_api_secret', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'name="secret" value="********"')
+
+    def test_endpoint_secret_does_not_update_when_eight_asterix_submitted(self):
+        response = self.submit_endpoint(type='test', secret='my_api_secret', debug=False)
+        self.assertContains(response, 'API Secret updated')
+        response = self.submit_endpoint(type='test', secret='********', debug=False)
+        self.assertContains(response, 'API Secret not updated')
+
+    def test_endpoint_queue_url_written_to_database(self):
+        response = self.submit_endpoint(type='test', queue_url='https://api', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'name="queue_url" value="https://api"')
+
+    def test_endpoint_get_url_written_to_database(self):
+        response = self.submit_endpoint(type='test', get_url='https://api_get', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self.assertContains(response, 'name="get_url" value="https://api_get"')
+
+    def test_endpoint_date_created_visible_on_subsequent_form_get(self):
+        response = self.submit_endpoint(type='test', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self._assertRegex(response, r'date_created">\w+\. \d+, \d{4,4}')
+
+    def test_endpoint_date_modified_visible_on_subsequent_form_get(self):
+        response = self.submit_endpoint(type='test', debug=False)
+        response = self.get_endpoint(type='test', debug=False)
+        self._assertRegex(response, r'date_modified">\w+\. \d+, \d{4,4}')
+
 
 #    m = re.search(r'Result at: ([^\s]*)', result_stdout)
 #    if (m):

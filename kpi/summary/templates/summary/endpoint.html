@@ -1,0 +1,86 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+
+    <h2>{{ page_heading }}</h2>
+
+    <form action="{% url 'summary:endpoint' endpoint_type %}" method="post">
+        <table id="dashboard_table">
+            <tr>
+                <th>
+                    <label>Endpoint Type</label>
+                </th>
+                <td>{{ endpoint_type }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_username">API Username</label>
+                </th>
+                <td>
+                    <input type="text" class="narrow-input" required name="username" value="{{ current_username }}" id="id_username" maxlength="50" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_secret">API Secret</label>
+                </th>
+                <td>
+                    <input type="text" class="narrow-input" required name="secret" value="{{ current_secret }}" id="id_secret" maxlength="50" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_queue_url">Queue URL</label>
+                </th>
+                <td>
+                    <input type="url" class="wide-input" required name="queue_url" value="{{ current_queue_url }}" id="id_queue_url" maxlength="200" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_get_url">Get URL</label>
+                </th>
+                <td>
+                    <input type="url" class="wide-input" required name="get_url" value="{{ current_get_url }}" id="id_get_url" maxlength="200" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_default_report_suite_id">Default Report Suite Id</label>
+                </th>
+                <td>
+                    <input type="text" class="narrow-input" required name="default_report_suite_id" value="{{ current_default_report_suite_id }}" id="id_default_report_suite_id" maxlength="50" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_default_report_period_days">Default Report Period Days</label>
+                </th>
+                <td>
+                    <input type="number" min="1" max="31" step="1" pattern="\d+" required class="narrow-input" name="default_report_period_days" value="{{ current_default_report_period_days }}" id="id_default_report_period_days" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_date_created">Date Created</label>
+                </th>
+                <td name="date_created" id="id_date_created">{{ current_date_created }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <label for="id_date_modified">Date Modified</label>
+                </th>
+                <td name="date_modified" id="id_date_modified">{{ current_date_modified }}</td>
+            </tr>
+            <tr>
+                <td><br/></td>
+            </tr>
+            <tr>
+                <td>
+                    <input class="submit-button" type="submit" value="Submit Dashboard" />
+                </td>
+            </tr>
+        </table>
+    </form>
+
+{% endblock %}

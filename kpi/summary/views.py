@@ -7,7 +7,9 @@ from django.urls import reverse
 
 from .models import Dash
 from .models import Queue
+from .models import Endpoint
 from .forms import EditForm
+from .forms import EndpointForm
 from django.views.decorators.csrf import csrf_exempt
 
 from urllib.parse import urlencode
@@ -275,16 +277,79 @@ def _process_edit_submit(request, dash):
     return render(request, 'summary/edit_confirmation.html', context, status=http_status)
 
 
+@csrf_exempt
+def endpoint(request, type):
+    try:
+        endpoint = Endpoint.objects.get(endpoint_type=type)
+    except Endpoint.DoesNotExist:
+        endpoint = Endpoint( endpoint_type = type )
+        endpoint.date_created = ''
+        endpoint.date_modified = ''
+
+    if request.method == 'POST':
+        return _process_endpoint_submit(request, endpoint)
+
+    secret_display = ''
+    if endpoint.secret:
+        secret_display = '********'
+
+    form = EndpointForm()
+    page_title = 'Endpoint ' + type
+    page_heading = 'Create / Edit Adobe Analytics Endpoint'
+
+    context = {
+        'form': form,
+        'endpoint_type': type,
+        'page_title': page_title,
+        'page_heading': page_heading,
+        'current_username': endpoint.username,
+        'current_secret': secret_display,
+        'current_queue_url': endpoint.queue_url,
+        'current_get_url': endpoint.get_url,
+        'current_date_created': endpoint.date_created,
+        'current_date_modified': endpoint.date_modified,
+        'current_default_report_period_days': endpoint.default_report_period_days,
+        'current_default_report_suite_id': endpoint.default_report_suite_id,
+    }
+
+    return render(request, 'summary/endpoint.html', context)
+
+
+def _process_endpoint_submit(request, endpoint):
+
+    endpoint.username = request.POST.get('username', None)
+    endpoint.queue_url = request.POST.get('queue_url', None)
+    endpoint.get_url = request.POST.get('get_url', None)
+    endpoint.default_report_suite_id = request.POST.get('default_report_suite_id', None)
+    endpoint.default_report_period_days = request.POST.get('default_report_period_days', None)
+
+    submitted_secret = request.POST.get('secret', None)
+    if submitted_secret == '********':
+        secret_message = 'API Secret not updated'
+    else:
+        endpoint.secret = submitted_secret
+        secret_message = 'API Secret updated'
+
+    endpoint.save()
+
+    page_title = 'xyz' + endpoint.endpoint_type
+    page_heading = 'abcd ' + endpoint.username
+    error = ''
+
+    context = {
+        'page_title': page_title,
+        'page_heading': page_heading,
+        'error': error,
+        'result_status_message': 'Endpoint config written to database ok',
+        'secret_message': secret_message,
+    }
+
+    http_status = 200
+
+    return render(request, 'summary/endpoint_confirmation.html', context, status=http_status)
+
+
 def graph(request, kpi):
-
-#    page_title = kpi + ' graph'
-#    page_heading = kpi + ' graph'
-
-#    context = {
-#        'kpi_name': kpi,
-#        'page_title': page_title,
-#        'page_heading': page_heading,
-#    }
 
     context = _get_data_for_kpi (request, kpi, 'graph')
 
