@@ -99,22 +99,36 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] Remove API Secret
         - [ ] Add default_report_suite_id
         - [ ] Add default_report_period_days
-        - [ ] Add metric
-    - [ ] Delete Edit feature
-    - [ ] Refactor Table to use new paradigm
-        - [ ] Endpoint defaults to 'prod'
-        - [ ] Endpoint can be changed to 'test' with ?endpoint=test query string parm
-        - [ ] Will first see if kpi_name exists
+        - [ ] Add metric_id
+        - [ ] table/graph will first check see if kpi_name exists
             - [ ] If so, use details from it
             - [ ] If not, use default details from endpoint, assuming that kpi_name == metric_id
+    - [ ] Refactor Table/Graph to use new paradigm
+    	- [x] Hard code to Report.Queue body
+    	- [x] Add query string endpoint=test to all test calls to Table/Graph
+    	- [x] Tests create Endpoint record as well as Edit record
+    	- [x] metric_id is read from URL (kpi)
+    	- [x] Get info from Endpoint table, intstead of Dash
+    		- [x] Username
+    		- [x] Password
+    		- [x] Queue URL
+    		- [x] Get URL
+    		- [x] Report Period Days
+    		- [x] Report Suite Id
+    	- [x] Remove creation of Edit record from bulk of tests
+        - [x] Endpoint defaults to 'prod'
+        - [x] Endpoint can be changed to 'test' with ?endpoint=test query string parm
         - [ ] Can put number of days in: summary/table/visits/60 is last 50 days
         - [ ] Can put date range in: summary/table/visits/20-Oct/10-Nov
+        - [ ] Can change report_suite_id: summary/table/visits/20-Oct/10-Nov?report_suite_id=my-id
         - [ ] Adobe error messages displayed
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
         - [ ] Must have content type header `Content-Type: application/json`
         - [x] Should return JSON object when posting to Queue
         - [x] Should return Report ID `{"reportID":3582786221}`
+        - [ ] Find out what Authentication Error message looks like (use wrong secret)
+        - [ ] Return correct error code on Authentication Error (400?)
     - method=Report.Get
         - [x] Post reportID `{"reportID":3582786221}`
         - [x] Should return JSON Object
@@ -133,6 +147,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Will return a report not ready error on first request (for known report ids)
             - [x] Find out what report not ready error looks like
         - [x] Will return report on second request
+        - [x] Should return 400 when report not ready
     - any method
         - [ ] Must have content type header
         - [ ] Presence of Username validated, if not present, actual error message returned

@@ -13,6 +13,7 @@ from .forms import EndpointForm
 from django.views.decorators.csrf import csrf_exempt
 
 from urllib.parse import urlencode
+import urllib.request
 from urllib.request import Request, urlopen
 
 from datetime import datetime, date, timedelta
@@ -20,6 +21,22 @@ import pytz
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
 import time, random, json, hashlib, string, binascii
+
+QUEUE_BODY_TEMPLATE="""
+{
+    "reportDescription":{
+        "reportSuiteID":"{REPORT_SUITE_ID}",
+        "dateFrom":"{DATE_FROM}",
+        "dateTo":"{DATE_TO}",
+        "dateGranularity":"day",
+        "metrics":[
+            {
+                "id":"{METRIC_ID}"
+            }
+        ]
+    }
+}
+"""
 
 def index(request):
     page_title = "KPI Dashboard"
@@ -75,8 +92,8 @@ def adobe_fake_api(request):
    "error_description":"Report not ready",
    "error_uri":null
 }
-"""         )
-        return HttpResponse( _build_metrics_response(queue.date_from, queue.date_to, queue.metric_id) )
+"""         , status=400 )
+        return HttpResponse( _build_metrics_response(queue.date_from, queue.date_to, queue.metric_id))
 
     utc=pytz.UTC
     today_aware = utc.localize(datetime.today()) 
@@ -346,7 +363,7 @@ def _process_endpoint_submit(request, endpoint):
 
     http_status = 200
 
-    return render(request, 'summary/endpoint_confirmation.html', context, status=http_status)
+    return render(request, 'summary/endpoint_confirmation.html', context)
 
 
 def graph(request, kpi):
@@ -372,48 +389,81 @@ def _get_data_for_kpi(request, kpi, view_type):
 
     page_title = kpi + ' ' + view_type
 
+#    try:
+#        dash = Dash.objects.get(kpi_name=kpi)
+#    except Dash.DoesNotExist:
+#        context = {
+#            'kpi_name': kpi,
+#            'page_title': page_title,
+#            'error_message':  kpi + ' has not been defined',
+#        }
+#        return context
+
+    endpoint_type = request.GET.get('endpoint', 'prod')
+
     try:
-        dash = Dash.objects.get(kpi_name=kpi)
-    except Dash.DoesNotExist:
+        endpoint = Endpoint.objects.get(endpoint_type=endpoint_type)
+    except Endpoint.DoesNotExist:
         context = {
             'kpi_name': kpi,
             'page_title': page_title,
-            'error_message':  kpi + ' has not been defined',
+            'error_message':  'Endpoint ' + endpoint_type + ' has not been defined',
         }
         return context
 
     debug = request.GET.get('debug', None)
 
-    page_heading = str(dash.report_period_days) + ' days ' + view_type + ' view for KPI ' + kpi
+    page_heading = str(endpoint.default_report_period_days) + ' days ' + view_type + ' view for KPI ' + kpi
 
-    date_from = _kpi_date(dash.report_period_days)
+    date_from = _kpi_date(endpoint.default_report_period_days)
     date_to = _kpi_date(1)
-    dash.queue_body = dash.queue_body.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
+    queue_body = QUEUE_BODY_TEMPLATE.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
+    queue_body = queue_body.replace('{METRIC_ID}', kpi)
+    queue_body = queue_body.replace('{REPORT_SUITE_ID}', endpoint.default_report_suite_id)
 
-    xwsse_header = _build_xwsse_header(dash.username, dash.secret)
+    xwsse_header = _build_xwsse_header(endpoint.username, endpoint.secret)
     content_header = 'application/json'
 
-    external_request = Request(dash.queue_url, dash.queue_body.encode('utf-8'))
+    external_request = Request(endpoint.queue_url, queue_body.encode('utf-8'))
     external_request.add_header('X-WSSE', xwsse_header)
     external_request.add_header('Content-Type', content_header)
-    queue_response_body = urlopen(external_request).read().decode()
+
+    try:
+        queue_response_body = urlopen(external_request).read().decode()
+    except urllib.error.HTTPError as err:
+        error_body = err.read().decode()
+        context = {
+            'kpi_name': kpi,
+            'page_title': page_title,
+            'error_message':  str(err.code) + ' Report.Queue error:' + error_body,
+        }
+        return context
 
     delay = 2
-    if 'http://localhost' in dash.get_url:
+    if 'http://localhost' in endpoint.get_url:
         delay = 0 # Fake API always passes on second attempt
     for attempt in range(1,5):
-        external_request = Request(dash.get_url, queue_response_body.encode('utf-8'))
-        xwsse_header = _build_xwsse_header(dash.username, dash.secret)
+        external_request = Request(endpoint.get_url, queue_response_body.encode('utf-8'))
+        xwsse_header = _build_xwsse_header(endpoint.username, endpoint.secret)
         external_request.add_header('X-WSSE', xwsse_header)
         external_request.add_header('Content-Type', content_header)
-        get_response_body = urlopen(external_request).read().decode()
+        try:
+            get_response_body = urlopen(external_request).read().decode()
+        except urllib.error.HTTPError as err:
+            error_body = err.read().decode()
+            error_json = json.loads(error_body)
+            if 'error' in error_json:
+                if error_json['error'] == 'report_not_ready':
+                    time.sleep(delay)
+                    delay = delay * 2
+                    continue
+            context = {
+                'kpi_name': kpi,
+                'page_title': page_title,
+                'error_message':  str(err.code) + ' Report.Get error:' + error_body,
+            }
+            return context
         response_json = json.loads(get_response_body)
-        if 'error' in response_json:
-            if response_json['error'] == 'report_not_ready':
-                time.sleep(delay)
-                delay = delay * 2
-        else:
-            break
 
     number = 0
     graph_values = ''
@@ -436,9 +486,9 @@ def _get_data_for_kpi(request, kpi, view_type):
         'date_from': date_from,
         'date_to': date_to,
         'debug': debug,
-        'queue_url': dash.queue_url,
-        'queue_body': dash.queue_body,
-        'get_url': dash.get_url,
+        'queue_url': endpoint.queue_url,
+        'queue_body': queue_body,
+        'get_url': endpoint.get_url,
         'xwsse_header': xwsse_header,
         'content_header': content_header,
         'queue_response_body': queue_response_body,

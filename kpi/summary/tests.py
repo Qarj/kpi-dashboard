@@ -67,17 +67,18 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    def get_graph(self, debug=False, kpi='unknown', page_debug='true'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph'), debug)
+    def get_graph(self, debug=False, kpi='unknown', page_debug='true', endpoint='test'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint), debug)
 
-    def get_table(self, debug=False, kpi='unknown', page_debug='true'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table'), debug )
+    def get_table(self, debug=False, kpi='unknown', page_debug='true', endpoint='test'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint), debug )
 
-    def _build_metric_display_url(self, kpi, page_debug, target_view):
+    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint):
         kwargs={}
         kwargs['kpi'] = kpi
         query_kwargs={}
         query_kwargs['debug'] =  page_debug
+        query_kwargs['endpoint'] =  endpoint
         return my_reverse(target_view, kwargs=kwargs, query_kwargs=query_kwargs)
 
     def get_edit(self, debug=False, kpi='unknown'):
@@ -261,7 +262,8 @@ class KPISummaryTests(TestCase):
         response_json = json.loads(response.content.decode('utf-8'))
         report_id = response_json['reportID']
         response = self.adobe_fake_api(build_report_get_request_body(report_id), method='Report.Get', debug=False)
-        self.assertContains(response, 'report_not_ready')
+        self._assertRegex(response, 'report_not_ready')
+        self.assertEqual(400, response.status_code, 'Response code 400 not found, was ' + str(response.status_code))
 
     def test_adobe_fake_api_returns_report_on_second_attempt(self):
         response = self.adobe_fake_api(build_report_queue_request_body(kpi_date(-2),kpi_date(-1)), method='Report.Queue', debug=False)
@@ -400,48 +402,48 @@ class KPISummaryTests(TestCase):
     #
 
     def test_get_kpi_table_heading(self):
-        response = self.submit_edit(kpi='table', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='table', debug=False)
         self.assertContains(response, 'table view for KPI table')
 
     def test_get_kpi_table_title(self):
-        response = self.submit_edit(kpi='title', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='title', debug=False)
         self.assertContains(response, 'title table')
 
     def test_get_kpi_table_num_days(self):
-        response = self.submit_edit(kpi='title', report_period_days='7', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='7', debug=False)
         response = self.get_table(kpi='title', debug=False)
         self.assertContains(response, '7 days table view')
 
     def test_get_kpi_table_datefrom(self):
-        response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='range', debug=False)
         self.assertContains(response, 'dateFrom">' + kpi_date(-2))
 
     def test_get_kpi_table_dateto(self):
-        response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='range', debug=False)
         self.assertContains(response, 'dateTo">' + kpi_date(-1))
 
     def test_get_kpi_table_dateto(self):
-        response = self.submit_edit(kpi='range', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='range', debug=False)
         self.assertContains(response, 'dateTo">' + kpi_date(-1))
 
     def test_get_kpi_table_debug_info_only_shown_in_debug_mode(self):
-        response = self.submit_edit(kpi='debug', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='debug', page_debug='false', debug=False)
         self._assertNotRegex(response, r'dateFrom')
 
     def test_get_kpi_table_shows_substituted_report_queue_body(self):
-        response = self.submit_edit(kpi='queue_body', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='queue_body', debug=False)
         self.assertContains(response, 'dateGranularity')
         self.assertContains(response, 'dateFrom&quot;:&quot;' + kpi_date(-2))
 
     def test_get_kpi_table_shows_x_wsse_header_in_debug_mode(self):
-        response = self.submit_edit(kpi='x-wsse_username', username="my:user", debug=False)
+        response = self.submit_endpoint(type='test', username='my:user', debug=False)
         response = self.get_table(kpi='x-wsse_username', debug=False)
         self.assertContains(response, 'Username=&quot;my:user&quot;')
         self.assertContains(response, 'PasswordDigest=')
@@ -449,58 +451,53 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'Created=')
 
     def test_get_kpi_table_shows_content_type_header_in_debug_mode(self):
-        response = self.submit_edit(kpi='content_type', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='content_type', debug=False)
         self.assertContains(response, 'application/json')
 
     def test_get_kpi_table_shows_queue_url_in_debug_mode(self):
-        response = self.submit_edit(kpi='queue_url', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='queue_url', debug=False)
         self.assertContains(response, 'method=Report.Queue')
 
     def test_get_kpi_table_shows_get_url_in_debug_mode(self):
-        response = self.submit_edit(kpi='get_url', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='get_url', debug=False)
         self.assertContains(response, 'method=Report.Get')
 
-    def test_get_kpi_table_shows_message_when_kpi_not_defined(self):
-        response = self.get_table(kpi='unknown_kpi_definition', debug=False)
-        self.assertContains(response, 'unknown_kpi_definition has not been defined')
+    def test_get_kpi_table_shows_message_when_endpoint_not_defined(self):
+        response = self.get_table(endpoint='unknown_endpoint', debug=False)
+        self.assertContains(response, 'unknown_endpoint has not been defined')
 
     def test_get_kpi_table_shows_queue_post_response_in_debug_mode(self):
-        response = self.submit_edit(kpi='queue_post', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='queue_post', debug=False)
         self._assertRegex(response, r'reportID&quot;:\d+')
 
     def test_get_kpi_table_shows_get_post_response_in_debug_mode(self):
-        response = self.submit_edit(kpi='queue_get', debug=False)
+        response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='queue_get', debug=False)
         self._assertRegex(response, r'counts&quot;:\[\s*&quot;\d{5,}')
 
-    def test_queue_response_used_for_get_not_stored_get_body(self):
-        response = self.submit_edit(kpi='queue_get', get_body='this is malformed', debug=False)
-        response = self.get_table(kpi='queue_get', debug=False)
-        self._assertRegex(response, r'counts&quot;:\[\s*&quot;\d{5,}')
-
-    def test_get_kpi_table_has_multiple_counts_in_get_report(self):
-        response = self.submit_edit(kpi='multi', report_period_days='2', debug=False)
+    def test_get_kpi_table_has_multiple_counts_in_get_report_1(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='multi', debug=False)
         self._assertCount(response, '&quot;counts&quot;', 2)
 
-    def test_get_kpi_table_has_multiple_counts_in_get_report(self):
-        response = self.submit_edit(kpi='multi', report_period_days='3', debug=False)
+    def test_get_kpi_table_has_multiple_counts_in_get_report_2(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         response = self.get_table(kpi='multi', debug=False)
         self._assertCount(response, '&quot;counts&quot;', 3)
 
     def test_get_kpi_table_has_different_counts_for_each_day(self):
-        response = self.submit_edit(kpi='different', report_period_days='3', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         response = self.get_table(kpi='different', debug=False)
         match = re.search(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8'))
         capture = match.group(1)
         self._assertCount(response, capture, 2) # in twice - once in raw response data, once in main table
 
     def test_get_kpi_table_total_is_sum_of_counts(self):
-        response = self.submit_edit(kpi='different', report_period_days='3', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         response = self.get_table(kpi='different', debug=False)
         total = 0
         for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
@@ -509,30 +506,31 @@ class KPISummaryTests(TestCase):
         self._assertCount(response, str(total), 1)
 
     def test_get_kpi_table_period_from_date_is_correct(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         period_from_date = date.today() - timedelta(3)
         period_from_date_string = period_from_date.strftime('%a. %d %b. %Y') # Mon. 19 Nov. 2018
-        response = self.submit_edit(kpi='period_from', report_period_days='3', debug=False)
         response = self.get_table(kpi='period_from', debug=False)
         self.assertContains(response, period_from_date_string)
 
     def test_get_kpi_table_period_to_date_is_correct(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         period_to_date = date.today() - timedelta(1)
         period_to_date_string = period_to_date.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
-        response = self.submit_edit(kpi='period_to', report_period_days='3', debug=False)
         response = self.get_table(kpi='period_to', debug=False)
         self.assertContains(response, period_to_date_string)
 
     def test_get_kpi_table_data_name_date_is_correct(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         date_1 = date.today() - timedelta(2)
         date_2 = date.today() - timedelta(1)
         date_1_string = date_1.strftime('%a. %d %b. %Y') # Tue. 20 Nov. 2018
         date_2_string = date_2.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
-        response = self.submit_edit(kpi='data_name_date', report_period_days='2', debug=False)
         response = self.get_table(kpi='data_name_date', debug=False)
         self.assertContains(response, 'name&quot;:&quot;' + date_1_string)
         self.assertContains(response, 'name&quot;:&quot;' + date_2_string)
 
     def test_get_kpi_table_data_year_month_day_is_correct(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         date_1 = date.today() - timedelta(2)
         date_2 = date.today() - timedelta(1)
         date_1_year = date_1.strftime('%Y') # 2018
@@ -541,7 +539,6 @@ class KPISummaryTests(TestCase):
         date_2_year = date_1.strftime('%Y') # 2018
         date_2_month = str(int(date_1.strftime('%m'))) # lose leading zero
         date_2_day = str(int(date_1.strftime('%d'))) # lose leading zero
-        response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
         response = self.get_table(kpi='data_date', debug=False)
         self.assertContains(response, 'year&quot;:' + date_1_year)
         self.assertContains(response, 'month&quot;:' + date_1_month)
@@ -551,21 +548,21 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'day&quot;:' + date_2_day)
 
     def test_get_kpi_table_data_metric_id_is_correct(self):
-        response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='data_date', debug=False)
-        self.assertContains(response, 'id&quot;:&quot;visits')
+        self.assertContains(response, 'id&quot;:&quot;data_date')
 
     def test_get_kpi_table_data_metric_name_is_correct(self):
-        response = self.submit_edit(kpi='data_date', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='data_date', debug=False)
-        self.assertContains(response, 'name&quot;:&quot;Visits')
+        self.assertContains(response, 'name&quot;:&quot;Data_Date')
 
     def test_get_kpi_table_shows_kpi_value_for_each_day(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         date_1 = date.today() - timedelta(2)
         date_2 = date.today() - timedelta(1)
         date_1_string = date_1.strftime('%a. %d %b. %Y') # Tue. 20 Nov. 2018
         date_2_string = date_2.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
-        response = self.submit_edit(kpi='each_day', report_period_days='2', debug=False)
         response = self.get_table(kpi='each_day', debug=False)
         self.assertContains(response, 'metric_date_1">' + date_1_string)
         self.assertContains(response, 'metric_date_2">' + date_2_string)
@@ -582,21 +579,21 @@ class KPISummaryTests(TestCase):
     #
 
     def test_can_get_kpi_graph_page_with_js_library(self):
-        response = self.submit_edit(kpi='graph', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_graph(kpi='graph', debug=False)
         self.assertContains(response, 'chart.bundle.js')
 
     def test_can_get_kpi_graph_page_with_a_dummy_graph(self):
-        response = self.submit_edit(kpi='graph', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_graph(kpi='graph', debug=False)
         self._assertRegex(response, r'\d{4,}, \d{4,}')
 
     def test_get_kpi_graph_shows_kpi_value_for_each_day(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         date_1 = date.today() - timedelta(2)
         date_2 = date.today() - timedelta(1)
         date_1_string = str(int(date_1.strftime('%d'))) + '/' + str(int(date_1.strftime('%m')))  # 1/11
         date_2_string = str(int(date_2.strftime('%d'))) + '/' + str(int(date_2.strftime('%m')))  # 2/11
-        response = self.submit_edit(kpi='each_day', report_period_days='2', debug=False)
         response = self.get_graph(kpi='each_day', debug=False)
         self.assertContains(response, '"' + date_1_string + '", "' + date_2_string + '"')
         counts = []
@@ -606,7 +603,7 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, counts[0] + ', ' + counts[1])
 
     def test_kpi_name_in_graph_label(self):
-        response = self.submit_edit(kpi='visits_label', report_period_days='2', debug=False)
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_graph(kpi='visits_label', debug=False)
         self._assertRegex(response, r'label: .visits_label')
 
