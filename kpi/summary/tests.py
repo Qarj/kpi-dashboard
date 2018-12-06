@@ -67,15 +67,17 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    def get_graph(self, debug=False, kpi='unknown', page_debug='true', endpoint='test'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint), debug)
+    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, endpoint='test'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint, report_period_days), debug)
 
-    def get_table(self, debug=False, kpi='unknown', page_debug='true', endpoint='test'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint), debug )
+    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, endpoint='test'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint, report_period_days), debug )
 
-    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint):
+    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint, report_period_days):
         kwargs={}
         kwargs['kpi'] = kpi
+        if report_period_days:
+            kwargs['report_period_days'] = report_period_days
         query_kwargs={}
         query_kwargs['debug'] =  page_debug
         query_kwargs['endpoint'] =  endpoint
@@ -573,6 +575,10 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'metric_value_1">' + counts[0])
         self.assertContains(response, 'metric_value_2">' + counts[1])
 
+    def test_table_can_specify_report_period_days_in_url(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_date', report_period_days='3', debug=False)
+        self.assertContains(response, 'metric_value_3')
 
     #
     # Get KPI data in graph view
@@ -607,6 +613,10 @@ class KPISummaryTests(TestCase):
         response = self.get_graph(kpi='visits_label', debug=False)
         self._assertRegex(response, r'label: .visits_label')
 
+    def test_graph_can_specify_report_period_days_in_url(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_graph(kpi='data_date', report_period_days='4', debug=False)
+        self._assertRegex(response, r'\d+, \d+, \d+, \d+')
 
     #
     # endpoint create/edit

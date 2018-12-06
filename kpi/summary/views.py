@@ -366,9 +366,9 @@ def _process_endpoint_submit(request, endpoint):
     return render(request, 'summary/endpoint_confirmation.html', context)
 
 
-def graph(request, kpi):
+def graph(request, kpi, report_period_days=None):
 
-    context = _get_data_for_kpi (request, kpi, 'graph')
+    context = _get_data_for_kpi (request, kpi, 'graph', report_period_days)
 
     if 'error_message' in context:
         return render(request, 'summary/error.html', context)
@@ -376,28 +376,18 @@ def graph(request, kpi):
     return render(request, 'summary/graph.html', context)
 
 
-def table(request, kpi):
+def table(request, kpi, report_period_days=None):
 
-    context = _get_data_for_kpi (request, kpi, 'table')
+    context = _get_data_for_kpi (request, kpi, 'table', report_period_days)
 
     if 'error_message' in context:
         return render(request, 'summary/error.html', context)
 
     return render(request, 'summary/table.html', context)
 
-def _get_data_for_kpi(request, kpi, view_type):
+def _get_data_for_kpi(request, kpi, view_type, report_period_days):
 
     page_title = kpi + ' ' + view_type
-
-#    try:
-#        dash = Dash.objects.get(kpi_name=kpi)
-#    except Dash.DoesNotExist:
-#        context = {
-#            'kpi_name': kpi,
-#            'page_title': page_title,
-#            'error_message':  kpi + ' has not been defined',
-#        }
-#        return context
 
     endpoint_type = request.GET.get('endpoint', 'prod')
 
@@ -413,9 +403,12 @@ def _get_data_for_kpi(request, kpi, view_type):
 
     debug = request.GET.get('debug', None)
 
-    page_heading = str(endpoint.default_report_period_days) + ' days ' + view_type + ' view for KPI ' + kpi
+    if report_period_days is None:
+        report_period_days = str(endpoint.default_report_period_days)
 
-    date_from = _kpi_date(endpoint.default_report_period_days)
+    page_heading = report_period_days + ' days ' + view_type + ' view for KPI ' + kpi
+
+    date_from = _kpi_date(int(report_period_days))
     date_to = _kpi_date(1)
     queue_body = QUEUE_BODY_TEMPLATE.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
     queue_body = queue_body.replace('{METRIC_ID}', kpi)

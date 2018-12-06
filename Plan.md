@@ -118,7 +118,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     	- [x] Remove creation of Edit record from bulk of tests
         - [x] Endpoint defaults to 'prod'
         - [x] Endpoint can be changed to 'test' with ?endpoint=test query string parm
-        - [ ] Can put number of days in: summary/table/visits/60 is last 50 days
+        - [x] Can put number of days in: summary/table/visits/60 is last 60 days
         - [ ] Can put date range in: summary/table/visits/20-Oct/10-Nov
         - [ ] Can change report_suite_id: summary/table/visits/20-Oct/10-Nov?report_suite_id=my-id
         - [ ] Adobe error messages displayed
