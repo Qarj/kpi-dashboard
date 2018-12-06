@@ -67,17 +67,21 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, endpoint='test'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint, report_period_days), debug)
+    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint, report_period_days, from_date, to_date), debug)
 
-    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, endpoint='test'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint, report_period_days), debug )
+    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint, report_period_days, from_date, to_date), debug )
 
-    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint, report_period_days):
+    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint, report_period_days, from_date, to_date):
         kwargs={}
         kwargs['kpi'] = kpi
-        if report_period_days:
+        if report_period_days is not None:
             kwargs['report_period_days'] = report_period_days
+        if from_date is not None:
+            kwargs['from_date'] = from_date
+        if to_date is not None:
+            kwargs['to_date'] = to_date
         query_kwargs={}
         query_kwargs['debug'] =  page_debug
         query_kwargs['endpoint'] =  endpoint
@@ -580,6 +584,11 @@ class KPISummaryTests(TestCase):
         response = self.get_table(kpi='data_date', report_period_days='3', debug=False)
         self.assertContains(response, 'metric_value_3')
 
+    def test_table_can_specify_from_date_and_to_date_in_url(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_date', from_date='1-Nov', to_date='04-Nov', debug=False)
+        self.assertContains(response, 'metric_value_4')
+
     #
     # Get KPI data in graph view
     #
@@ -616,6 +625,11 @@ class KPISummaryTests(TestCase):
     def test_graph_can_specify_report_period_days_in_url(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_graph(kpi='data_date', report_period_days='4', debug=False)
+        self._assertRegex(response, r'\d+, \d+, \d+, \d+')
+
+    def test_graph_can_specify_from_date_and_to_date_in_url(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_graph(kpi='data_date', from_date='1-Nov', to_date='04-Nov', debug=False)
         self._assertRegex(response, r'\d+, \d+, \d+, \d+')
 
     #

@@ -17,6 +17,7 @@ import urllib.request
 from urllib.request import Request, urlopen
 
 from datetime import datetime, date, timedelta
+from dateutil import parser
 import pytz
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
@@ -366,9 +367,9 @@ def _process_endpoint_submit(request, endpoint):
     return render(request, 'summary/endpoint_confirmation.html', context)
 
 
-def graph(request, kpi, report_period_days=None):
+def graph(request, kpi, report_period_days=None, from_date=None, to_date=None):
 
-    context = _get_data_for_kpi (request, kpi, 'graph', report_period_days)
+    context = _get_data_for_kpi (request, kpi, 'graph', report_period_days, from_date, to_date)
 
     if 'error_message' in context:
         return render(request, 'summary/error.html', context)
@@ -376,16 +377,16 @@ def graph(request, kpi, report_period_days=None):
     return render(request, 'summary/graph.html', context)
 
 
-def table(request, kpi, report_period_days=None):
+def table(request, kpi, report_period_days=None, from_date=None, to_date=None):
 
-    context = _get_data_for_kpi (request, kpi, 'table', report_period_days)
+    context = _get_data_for_kpi (request, kpi, 'table', report_period_days, from_date, to_date)
 
     if 'error_message' in context:
         return render(request, 'summary/error.html', context)
 
     return render(request, 'summary/table.html', context)
 
-def _get_data_for_kpi(request, kpi, view_type, report_period_days):
+def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date, url_to_date):
 
     page_title = kpi + ' ' + view_type
 
@@ -406,10 +407,15 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days):
     if report_period_days is None:
         report_period_days = str(endpoint.default_report_period_days)
 
-    page_heading = report_period_days + ' days ' + view_type + ' view for KPI ' + kpi
+    if url_from_date is not None:
+        date_from = _parse_date(url_from_date)
+        date_to = _parse_date(url_to_date)
+        page_heading = date_from + ' to ' + date_to + ' ' + view_type + ' view for KPI ' + kpi
+    else:
+        date_from = _kpi_date(int(report_period_days))
+        date_to = _kpi_date(1)
+        page_heading = report_period_days + ' days ' + view_type + ' view for KPI ' + kpi
 
-    date_from = _kpi_date(int(report_period_days))
-    date_to = _kpi_date(1)
     queue_body = QUEUE_BODY_TEMPLATE.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
     queue_body = queue_body.replace('{METRIC_ID}', kpi)
     queue_body = queue_body.replace('{REPORT_SUITE_ID}', endpoint.default_report_suite_id)
@@ -495,6 +501,13 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days):
 
 def _kpi_date(offset):
     desired_date = date.today() - timedelta(offset)
+    return _adobe_api_date_format(desired_date)
+
+def _parse_date(url_date):
+    desired_date = parser.parse(url_date)
+    return _adobe_api_date_format(desired_date)
+
+def _adobe_api_date_format(desired_date):
     return desired_date.strftime("%Y-%m-%d")
 
 def _build_xwsse_header(username, secret):

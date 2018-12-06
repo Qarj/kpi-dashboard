@@ -6,6 +6,28 @@ KPI documentation: https://github.com/AdobeDocs/analytics-1.4-apis
 ## Dashboard Home
 http://localhost/kpi/summary/
 
+## Create / Edit endpoint
+
+http://localhost/kpi/summary/endpoint/prod/
+http://localhost/kpi/summary/endpoint/test/
+
+## Table view
+
+http://localhost/kpi/summary/table/visits/
+http://localhost/kpi/summary/table/visits/31
+http://localhost/kpi/summary/table/visits/1-Nov/20-Nov
+http://localhost/kpi/summary/table/visits/1-Nov-2017/20-Nov-2018
+
+### Override the endpoint (default is prod)
+http://localhost/kpi/summary/table/visits/?endpoint=test
+
+### Debug mode
+http://localhost/kpi/summary/table/visits/?debug=true
+
+## Graph view
+
+Same urls as table view, except s/table/graph/
+
 ## Create / Edit kpi
 
 http://localhost/kpi/summary/edit/< KPI NAME >/
