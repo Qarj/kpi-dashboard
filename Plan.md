@@ -158,11 +158,18 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] Created should not be more than 5 mins in the future, if it is, actual error message returned
         - [ ] Created should not be more than 5 mins in the past, if it is, actual error message returned
         - [ ] Must have `Content-Type: application/json` header, else actual error message returned
+- [ ] Cache
+    - [ ] New Model metric_id, report_suite_id, metric_date, date_modified
+    - [ ] Attempt to find metric in Cache first
+        - [ ] Debug mode indicates cache hit
+    - [ ] If full request need, update Cache afterwards
+    - [ ] Delete cache metric id
+    - [ ] Delete catch entirely
 - [ ] Deployment
     - [x] mod-wsgi fix for Django
 	- [x] Linux config added to test-results-dashboard
-    - [ ] Fix: `ALLOWED_HOSTS = ['*']`
-	- [ ] Deployment instructions for Linux
+    - [x] Fix: `ALLOWED_HOSTS = ['*']`
+	- [x] Deployment instructions for Linux
 	- [ ] Deployment instructions for Windows
 - [ ] Canary
     - [ ] Fake endpoint responds to POST Report.Queue
