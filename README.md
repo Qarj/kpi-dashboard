@@ -66,8 +66,8 @@ Setup the database:
 ```
 cd /var/www/kpi/kpi-dashboard/kpi
 python manage.py makemigrations 
-python manage.py migrate
 sudo chmod 666 db.sqlite3
+python manage.py migrate
 ```
 
 Restart Apache:
