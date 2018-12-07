@@ -55,6 +55,21 @@ sudo find . -type f -exec chmod a+rw {} \;
 sudo find . -type f -iname "*.py" -exec chmod +x {} \;
 ```
 
+Ensure Python 3 virtual environment is activated then install Python packages:
+```
+cd /usr/local/venvs/dash
+source bin/activate
+pip install python-dateutil
+```
+
+Setup the database:
+```
+cd /var/www/kpi/kpi-dashboard/kpi
+python manage.py makemigrations 
+sudo chmod 666 db.sqlite3
+python manage.py migrate
+```
+
 Restart Apache:
 ```
 sudo systemctl restart apache2
