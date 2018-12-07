@@ -59,7 +59,15 @@ Ensure Python 3 virtual environment is activated then install Python packages:
 ```
 cd /usr/local/venvs/dash
 source bin/activate
-sudo pip install dateutil
+pip install python-dateutil
+```
+
+Setup the database:
+```
+cd /var/www/kpi/kpi-dashboard/kpi
+python manage.py makemigrations 
+python manage.py migrate
+sudo chmod 666 db.sqlite3
 ```
 
 Restart Apache:
