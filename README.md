@@ -33,8 +33,46 @@ Same urls as table view, except s/table/graph/
 http://localhost/kpi/summary/edit/< KPI NAME >/
 http://localhost/kpi/summary/edit/site_visits/
 
+# Linux Deployment
 
-## Fake Adobe API
+Deploy the following project to satisfy Apache configuration dependencies:
+- https://github.com/Qarj/test-results-dashboard
+
+Create a folder for webimblaze-server and clone the project:
+```
+cd /var/www
+sudo mkdir kpi
+sudo chmod 777 kpi
+cd kpi
+sudo git clone https://github.com/Qarj/kpi-dashboard
+```
+
+Set permissions so the Apache user can access the file system:
+```
+cd /var/www/kpi
+sudo find . -type d -exec chmod a+rwx {} \;
+sudo find . -type f -exec chmod a+rw {} \;
+sudo find . -type f -iname "*.py" -exec chmod +x {} \;
+```
+
+Restart Apache:
+```
+sudo systemctl restart apache2
+```
+
+Verify with url: http://localhost/kpi/summary/endpoint/test/
+
+### Debugging
+
+```
+sudo cat /etc/apache2/envvars
+sudo cat /var/log/apache2/error.log
+```
+
+
+
+# Fake Adobe API
+
 ### Home page: http://localhost/kpi/summary/adobe
 
 ### Queue request

@@ -158,6 +158,11 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] Created should not be more than 5 mins in the future, if it is, actual error message returned
         - [ ] Created should not be more than 5 mins in the past, if it is, actual error message returned
         - [ ] Must have `Content-Type: application/json` header, else actual error message returned
+- [ ] Deployment
+    - [x] mod-wsgi fix for Django
+	- [x] Linux config added to test-results-dashboard
+	- [ ] Deployment instructions for Linux
+	- [ ] Deployment instructions for Windows
 - [ ] Canary
     - [ ] Fake endpoint responds to POST Report.Queue
     - [ ] Fake endpoint responds to POST Report.Get
