@@ -55,6 +55,13 @@ sudo find . -type f -exec chmod a+rw {} \;
 sudo find . -type f -iname "*.py" -exec chmod +x {} \;
 ```
 
+Ensure Python 3 virtual environment is activated then install Python packages:
+```
+cd /usr/local/venvs/dash
+source bin/activate
+sudo pip install dateutil
+```
+
 Restart Apache:
 ```
 sudo systemctl restart apache2
