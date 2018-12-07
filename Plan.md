@@ -161,6 +161,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
 - [ ] Deployment
     - [x] mod-wsgi fix for Django
 	- [x] Linux config added to test-results-dashboard
+    - [ ] Fix: `ALLOWED_HOSTS = ['*']`
 	- [ ] Deployment instructions for Linux
 	- [ ] Deployment instructions for Windows
 - [ ] Canary
