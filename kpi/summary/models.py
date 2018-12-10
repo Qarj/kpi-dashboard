@@ -39,3 +39,9 @@ class Queue(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     get_requests = models.IntegerField(default=0)
 
+class Cache(models.Model):
+    metric_id = models.CharField(max_length=50)
+    report_suite_id = models.CharField(max_length=50)
+    metric_date = models.DateField()
+    value = models.CharField(max_length=12, default=None, blank=True, null=True)
+    date_modified = models.DateTimeField(auto_now=True)

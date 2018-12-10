@@ -596,7 +596,7 @@ class KPISummaryTests(TestCase):
     def test_can_get_kpi_graph_page_with_js_library(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_graph(kpi='graph', debug=False)
-        self.assertContains(response, 'chart.bundle.js')
+        self.assertContains(response, 'Chart.bundle.js')
 
     def test_can_get_kpi_graph_page_with_a_dummy_graph(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
@@ -744,6 +744,30 @@ class KPISummaryTests(TestCase):
         response = self.submit_endpoint(type='test', debug=False)
         response = self.get_endpoint(type='test', debug=False)
         self._assertRegex(response, r'date_modified">\w+\. \d+, \d{4,4}')
+
+
+    #
+    # Metric Cache
+    #
+
+    def test_production_metric_data_is_cached(self):
+        response = self.submit_endpoint(type='prod', default_report_period_days='2', debug=False)
+        response = self.get_graph(kpi='cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
+        self._assertNotRegex(response, r'Metric data found in cache')
+        counts = []
+        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+            capture = match.group(1)
+            counts.append(capture)
+        response = self.get_graph(kpi='cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
+        self._assertRegex(response, r'Metric data found in cache')
+        self.assertContains(response, counts[0] + ', ' + counts[1] + ', ' + counts[2] + ', ' + counts[3])
+
+    def test_test_metric_data_is_not_cached(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_graph(kpi='not_cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
+        self._assertNotRegex(response, r'Metric data found in cache')
+        response = self.get_graph(kpi='not_cache', from_date='1-Nov', to_date='04-Nov', endpoint='test', debug=False)
+        self._assertNotRegex(response, r'Metric data found in cache')
 
 
 #    m = re.search(r'Result at: ([^\s]*)', result_stdout)

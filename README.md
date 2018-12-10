@@ -169,6 +169,14 @@ Created time out of sync
 }
 ```
 
+Metr not found
+```
+{
+   "error":"metric_id_invalid",
+   "error_description":"Metric \"site_visits_42\" not found",
+   "error_uri":"https://marketing.adobe.com/developer/en_US/documentation/analytics-reporting-1-4/metrics"
+}
+```
 
 ### Get request
 

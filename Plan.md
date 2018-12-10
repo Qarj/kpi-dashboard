@@ -159,10 +159,10 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] Created should not be more than 5 mins in the past, if it is, actual error message returned
         - [ ] Must have `Content-Type: application/json` header, else actual error message returned
 - [ ] Cache
-    - [ ] New Model metric_id, report_suite_id, metric_date, date_modified
-    - [ ] Attempt to find metric in Cache first
-        - [ ] Debug mode indicates cache hit
-    - [ ] If full request need, update Cache afterwards
+    - [x] New Model metric_id, report_suite_id, metric_date, value, date_modified
+    - [x] Attempt to find metric in Cache first
+        - [x] Debug mode indicates cache hit
+    - [x] If full request needed, update Cache afterwards
     - [ ] Delete cache metric id
     - [ ] Delete catch entirely
 - [ ] Deployment

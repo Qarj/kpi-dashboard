@@ -8,6 +8,7 @@ from django.urls import reverse
 from .models import Dash
 from .models import Queue
 from .models import Endpoint
+from .models import Cache
 from .forms import EditForm
 from .forms import EndpointForm
 from django.views.decorators.csrf import csrf_exempt
@@ -395,17 +396,14 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
     try:
         endpoint = Endpoint.objects.get(endpoint_type=endpoint_type)
     except Endpoint.DoesNotExist:
-        context = {
-            'kpi_name': kpi,
-            'page_title': page_title,
-            'error_message':  'Endpoint ' + endpoint_type + ' has not been defined',
-        }
-        return context
+        return _build_error_context(kpi, page_title, 'Endpoint ' + endpoint_type + ' has not been defined')
 
     debug = request.GET.get('debug', None)
 
     if report_period_days is None:
         report_period_days = str(endpoint.default_report_period_days)
+    report_suite_id = endpoint.default_report_suite_id
+    metric_id = kpi
 
     if url_from_date is not None:
         date_from = _parse_date(url_from_date)
@@ -417,8 +415,8 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
         page_heading = report_period_days + ' days ' + view_type + ' view for KPI ' + kpi
 
     queue_body = QUEUE_BODY_TEMPLATE.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
-    queue_body = queue_body.replace('{METRIC_ID}', kpi)
-    queue_body = queue_body.replace('{REPORT_SUITE_ID}', endpoint.default_report_suite_id)
+    queue_body = queue_body.replace('{METRIC_ID}', metric_id)
+    queue_body = queue_body.replace('{REPORT_SUITE_ID}', report_suite_id)
 
     xwsse_header = _build_xwsse_header(endpoint.username, endpoint.secret)
     content_header = 'application/json'
@@ -427,42 +425,37 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
     external_request.add_header('X-WSSE', xwsse_header)
     external_request.add_header('Content-Type', content_header)
 
-    try:
-        queue_response_body = urlopen(external_request).read().decode()
-    except urllib.error.HTTPError as err:
-        error_body = err.read().decode()
-        context = {
-            'kpi_name': kpi,
-            'page_title': page_title,
-            'error_message':  str(err.code) + ' Report.Queue error:' + error_body,
-        }
-        return context
+    response_json = _get_metrics_from_cache(metric_id, report_suite_id, date_from, date_to, endpoint_type)
+    queue_response_body = 'NA'
+    get_response_body = 'Metric data found in cache'
 
-    delay = 2
-    if 'http://localhost' in endpoint.get_url:
-        delay = 0 # Fake API always passes on second attempt
-    for attempt in range(1,5):
-        external_request = Request(endpoint.get_url, queue_response_body.encode('utf-8'))
-        xwsse_header = _build_xwsse_header(endpoint.username, endpoint.secret)
-        external_request.add_header('X-WSSE', xwsse_header)
-        external_request.add_header('Content-Type', content_header)
+    if response_json is None:
         try:
-            get_response_body = urlopen(external_request).read().decode()
+            queue_response_body = urlopen(external_request).read().decode()
         except urllib.error.HTTPError as err:
-            error_body = err.read().decode()
-            error_json = json.loads(error_body)
-            if 'error' in error_json:
-                if error_json['error'] == 'report_not_ready':
-                    time.sleep(delay)
-                    delay = delay * 2
-                    continue
-            context = {
-                'kpi_name': kpi,
-                'page_title': page_title,
-                'error_message':  str(err.code) + ' Report.Get error:' + error_body,
-            }
-            return context
-        response_json = json.loads(get_response_body)
+            error_body = err.read().decode().replace("\\/", "/") 
+            return _build_error_context(kpi, page_title, str(err.code) + ' Report.Queue error:' + error_body)
+
+        delay = 2
+        if 'http://localhost' in endpoint.get_url:
+            delay = 0 # Fake API always passes on second attempt
+        for attempt in range(1,5):
+            external_request = Request(endpoint.get_url, queue_response_body.encode('utf-8'))
+            xwsse_header = _build_xwsse_header(endpoint.username, endpoint.secret)
+            external_request.add_header('X-WSSE', xwsse_header)
+            external_request.add_header('Content-Type', content_header)
+            try:
+                get_response_body = urlopen(external_request).read().decode()
+            except urllib.error.HTTPError as err:
+                error_body = err.read().decode()
+                error_json = json.loads(error_body)
+                if 'error' in error_json:
+                    if error_json['error'] == 'report_not_ready':
+                        time.sleep(delay)
+                        delay = delay * 2
+                        continue
+                return _build_error_context(kpi, page_title, str(err.code) + ' Report.Get error:' + error_body)
+            response_json = json.loads(get_response_body)
 
     number = 0
     graph_values = ''
@@ -474,9 +467,12 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
             'number': str(number),
             'value': datum['counts'][0],
             'date': datum['name'],
+            'metric_date': date(datum['year'], datum['month'], datum['day']),
         } )
         graph_values += datum['counts'][0] + ', '
         graph_dates += '"' + str(datum['day']) + '/' + str(datum['month']) + '", '
+
+    _update_production_metric_cache(metrics, metric_id, report_suite_id, endpoint_type)
 
     context = {
         'kpi_name': kpi,
@@ -499,6 +495,54 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
 
     return context
 
+def _get_metrics_from_cache(metric_id, report_suite_id, date_from, date_to, endpoint_type):
+
+    if endpoint_type != 'prod':
+        return None
+
+    metric_from_date = _date_object_from_adobe_date(date_from)
+    metric_to_date = _date_object_from_adobe_date(date_to)
+
+    if metric_from_date > metric_to_date:
+        return None
+
+    data = []
+    process_date = metric_from_date
+    while process_date <= metric_to_date: 
+        try:
+            cache = Cache.objects.get( metric_id=metric_id, report_suite_id=report_suite_id, metric_date=process_date )
+        except Cache.DoesNotExist:
+            return None
+        counts = []
+        counts.append (cache.value)
+        data.append ( {
+            'name': _adobe_api_datename_format(process_date),
+            'year': process_date.year,
+            'month': process_date.month,
+            'day': process_date.day,
+            'counts': counts,
+        } )
+        process_date = process_date + timedelta(days=1)
+
+    response_json = { 'report': { 'data': data } }
+    return response_json
+
+def _update_production_metric_cache(metrics, metric_id, report_suite_id, endpoint_type):
+
+    if endpoint_type != 'prod':
+        return
+
+    for metric in metrics:
+        #metric_date = _date_object_from_adobe_date( metric.get('date') )
+        metric_date = metric.get('metric_date')
+        try:
+            cache = Cache.objects.get( metric_id=metric_id, report_suite_id=report_suite_id, metric_date=metric_date )
+        except Cache.DoesNotExist:
+            cache = Cache( metric_id=metric_id, report_suite_id=report_suite_id, metric_date=metric_date )
+        cache.value = metric.get('value')
+        cache.save()
+    return
+
 def _kpi_date(offset):
     desired_date = date.today() - timedelta(offset)
     return _adobe_api_date_format(desired_date)
@@ -509,6 +553,12 @@ def _parse_date(url_date):
 
 def _adobe_api_date_format(desired_date):
     return desired_date.strftime("%Y-%m-%d")
+
+def _adobe_api_datename_format(desired_date):
+    return desired_date.strftime('%a. %d %b. %Y')
+
+def _date_object_from_adobe_date(adobe_date):
+    return datetime.strptime(adobe_date, "%Y-%m-%d").date()
 
 def _build_xwsse_header(username, secret):
     nonce = hashlib.md5(''.join(random.choices(string.ascii_uppercase + string.digits, k=42)).encode()).hexdigest()
@@ -533,3 +583,11 @@ def _serialize_header(properties):
     for key, value in properties.items():
         header.append('{key}="{value}"'.format(key=key, value=value))
     return ', '.join(header)
+
+def _build_error_context(kpi, page_title, error_message):
+    context = {
+        'kpi_name': kpi,
+        'page_title': page_title,
+        'error_message': error_message,
+    }
+    return context
