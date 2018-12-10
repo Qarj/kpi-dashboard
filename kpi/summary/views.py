@@ -428,8 +428,10 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
     response_json = _get_metrics_from_cache(metric_id, report_suite_id, date_from, date_to, endpoint_type)
     queue_response_body = 'NA'
     get_response_body = 'Metric data found in cache'
+    cache_miss = False
 
     if response_json is None:
+        cache_miss = True
         try:
             queue_response_body = urlopen(external_request).read().decode()
         except urllib.error.HTTPError as err:
@@ -472,7 +474,8 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
         graph_values += datum['counts'][0] + ', '
         graph_dates += '"' + str(datum['day']) + '/' + str(datum['month']) + '", '
 
-    _update_production_metric_cache(metrics, metric_id, report_suite_id, endpoint_type)
+    if cache_miss:
+        _update_production_metric_cache(metrics, metric_id, report_suite_id, endpoint_type)
 
     context = {
         'kpi_name': kpi,
