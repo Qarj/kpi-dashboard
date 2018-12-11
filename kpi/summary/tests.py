@@ -67,13 +67,13 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint, report_period_days, from_date, to_date), debug)
+    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test', report_suite_id='default-report-suite'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint, report_period_days, from_date, to_date, report_suite_id), debug)
 
-    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test'):
-        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint, report_period_days, from_date, to_date), debug )
+    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test', report_suite_id='default-report-suite'):
+        return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint, report_period_days, from_date, to_date, report_suite_id), debug )
 
-    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint, report_period_days, from_date, to_date):
+    def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint, report_period_days, from_date, to_date, report_suite_id):
         kwargs={}
         kwargs['kpi'] = kpi
         if report_period_days is not None:
@@ -85,6 +85,7 @@ class KPISummaryTests(TestCase):
         query_kwargs={}
         query_kwargs['debug'] =  page_debug
         query_kwargs['endpoint'] =  endpoint
+        query_kwargs['report_suite_id'] =  report_suite_id
         return my_reverse(target_view, kwargs=kwargs, query_kwargs=query_kwargs)
 
     def get_edit(self, debug=False, kpi='unknown'):
@@ -589,6 +590,7 @@ class KPISummaryTests(TestCase):
         response = self.get_table(kpi='data_date', from_date='1-Nov', to_date='04-Nov', debug=False)
         self.assertContains(response, 'metric_value_4')
 
+
     #
     # Get KPI data in graph view
     #
@@ -652,6 +654,12 @@ class KPISummaryTests(TestCase):
         # %d-%b 04-Nov http://strftime.org/
         response = self.get_graph(kpi='data_date', from_date=from_date.strftime('%d-%b'), to_date=to_date.strftime('%d-%b'), debug=False)
         self.assertContains(response, 'From date cannot be greater than to date')
+
+    def test_can_specify_report_suite_id_in_query_string(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_table(kpi='data_date', from_date='1-Nov', to_date='04-Nov', report_suite_id='my-cool-id', debug=False)
+        self.assertContains(response, 'reportSuiteID":"my-cool-id')
+
 
     #
     # endpoint create/edit

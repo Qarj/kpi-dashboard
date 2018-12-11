@@ -398,11 +398,14 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
     except Endpoint.DoesNotExist:
         return _build_error_context(kpi, page_title, 'Endpoint ' + endpoint_type + ' has not been defined')
 
+    endpoint_type = request.GET.get('endpoint', 'prod')
     debug = request.GET.get('debug', None)
+    report_suite_id = request.GET.get('report_suite_id', None)
 
     if report_period_days is None:
         report_period_days = str(endpoint.default_report_period_days)
-    report_suite_id = endpoint.default_report_suite_id
+    if report_suite_id is None:
+        report_suite_id = endpoint.default_report_suite_id
     metric_id = kpi
 
     if url_from_date is not None:

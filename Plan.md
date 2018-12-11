@@ -120,7 +120,9 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Endpoint can be changed to 'test' with ?endpoint=test query string parm
         - [x] Can put number of days in: summary/table/visits/60 is last 60 days
         - [x] Can put date range in: summary/table/visits/20-Oct/10-Nov
-        - [ ] Can change report_suite_id: summary/table/visits/20-Oct/10-Nov?report_suite_id=my-id
+        - [x] Can change report_suite_id: summary/table/visits/20-Oct/10-Nov?report_suite_id=my-id
+            - [x] table
+            - [x] graph
         - [x] Throw error if to_date is > yesterday
         - [x] Throw error if from_date > to_date
         - [ ] Adobe error messages displayed (needs test)
