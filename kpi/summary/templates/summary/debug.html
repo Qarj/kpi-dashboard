@@ -14,7 +14,7 @@
         </tr>
         <tr>
             <td>Report.Queue</td>
-            <td name="Report.Queue"><pre><code>{{ queue_body }}</code></pre></td>
+            <td name="Report.Queue"><pre><code>{{ queue_body|safe }}</code></pre></td>
         </tr>
         <tr>
             <td>Get URL</td>
@@ -35,7 +35,7 @@
     <table id="post_queue_response" class="debug">
         <tr>
             <td>Queue Response</td>
-            <td name="Queue Response"><pre><code>{{ queue_response_body }}</code></pre></td>
+            <td name="Queue Response"><pre><code>{{ queue_response_body|safe }}</code></pre></td>
         </tr>
     </table>
 
@@ -44,7 +44,7 @@
     <table id="post_get_response" class="debug">
         <tr>
             <td>Get Response</td>
-            <td name="Get Response"><pre><code>{{ get_response_body }}</code></pre></td>
+            <td name="Get Response"><pre><code>{{ get_response_body|safe }}</code></pre></td>
         </tr>
     </table>
 

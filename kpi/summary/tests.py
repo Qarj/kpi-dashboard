@@ -446,7 +446,7 @@ class KPISummaryTests(TestCase):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='queue_body', debug=False)
         self.assertContains(response, 'dateGranularity')
-        self.assertContains(response, 'dateFrom&quot;:&quot;' + kpi_date(-2))
+        self.assertContains(response, 'dateFrom":"' + kpi_date(-2))
 
     def test_get_kpi_table_shows_x_wsse_header_in_debug_mode(self):
         response = self.submit_endpoint(type='test', username='my:user', debug=False)
@@ -478,27 +478,27 @@ class KPISummaryTests(TestCase):
     def test_get_kpi_table_shows_queue_post_response_in_debug_mode(self):
         response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='queue_post', debug=False)
-        self._assertRegex(response, r'reportID&quot;:\d+')
+        self._assertRegex(response, r'reportID":\d+')
 
     def test_get_kpi_table_shows_get_post_response_in_debug_mode(self):
         response = self.submit_endpoint(type='test', debug=False)
         response = self.get_table(kpi='queue_get', debug=False)
-        self._assertRegex(response, r'counts&quot;:\[\s*&quot;\d{5,}')
+        self._assertRegex(response, r'counts":\[\s*"\d{5,}')
 
     def test_get_kpi_table_has_multiple_counts_in_get_report_1(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='multi', debug=False)
-        self._assertCount(response, '&quot;counts&quot;', 2)
+        self._assertCount(response, '"counts"', 2)
 
     def test_get_kpi_table_has_multiple_counts_in_get_report_2(self):
         response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         response = self.get_table(kpi='multi', debug=False)
-        self._assertCount(response, '&quot;counts&quot;', 3)
+        self._assertCount(response, '"counts"', 3)
 
     def test_get_kpi_table_has_different_counts_for_each_day(self):
         response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         response = self.get_table(kpi='different', debug=False)
-        match = re.search(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8'))
+        match = re.search(r'counts":\[\s*"(\d+)', response.content.decode('utf-8'))
         capture = match.group(1)
         self._assertCount(response, capture, 2) # in twice - once in raw response data, once in main table
 
@@ -506,7 +506,7 @@ class KPISummaryTests(TestCase):
         response = self.submit_endpoint(type='test', default_report_period_days='3', debug=False)
         response = self.get_table(kpi='different', debug=False)
         total = 0
-        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+        for match in re.finditer(r'counts":\[\s*"(\d+)', response.content.decode('utf-8')):
             capture = match.group(1)
             total += int(capture)
         self._assertCount(response, str(total), 1)
@@ -532,8 +532,8 @@ class KPISummaryTests(TestCase):
         date_1_string = date_1.strftime('%a. %d %b. %Y') # Tue. 20 Nov. 2018
         date_2_string = date_2.strftime('%a. %d %b. %Y') # Wed. 21 Nov. 2018
         response = self.get_table(kpi='data_name_date', debug=False)
-        self.assertContains(response, 'name&quot;:&quot;' + date_1_string)
-        self.assertContains(response, 'name&quot;:&quot;' + date_2_string)
+        self.assertContains(response, 'name":"' + date_1_string)
+        self.assertContains(response, 'name":"' + date_2_string)
 
     def test_get_kpi_table_data_year_month_day_is_correct(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
@@ -546,22 +546,22 @@ class KPISummaryTests(TestCase):
         date_2_month = str(int(date_1.strftime('%m'))) # lose leading zero
         date_2_day = str(int(date_1.strftime('%d'))) # lose leading zero
         response = self.get_table(kpi='data_date', debug=False)
-        self.assertContains(response, 'year&quot;:' + date_1_year)
-        self.assertContains(response, 'month&quot;:' + date_1_month)
-        self.assertContains(response, 'day&quot;:' + date_1_day)
-        self.assertContains(response, 'year&quot;:' + date_2_year)
-        self.assertContains(response, 'month&quot;:' + date_2_month)
-        self.assertContains(response, 'day&quot;:' + date_2_day)
+        self.assertContains(response, 'year":' + date_1_year)
+        self.assertContains(response, 'month":' + date_1_month)
+        self.assertContains(response, 'day":' + date_1_day)
+        self.assertContains(response, 'year":' + date_2_year)
+        self.assertContains(response, 'month":' + date_2_month)
+        self.assertContains(response, 'day":' + date_2_day)
 
     def test_get_kpi_table_data_metric_id_is_correct(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='data_date', debug=False)
-        self.assertContains(response, 'id&quot;:&quot;data_date')
+        self.assertContains(response, 'id":"data_date')
 
     def test_get_kpi_table_data_metric_name_is_correct(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_table(kpi='data_date', debug=False)
-        self.assertContains(response, 'name&quot;:&quot;Data_Date')
+        self.assertContains(response, 'name":"Data_Date')
 
     def test_get_kpi_table_shows_kpi_value_for_each_day(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
@@ -573,7 +573,7 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'metric_date_1">' + date_1_string)
         self.assertContains(response, 'metric_date_2">' + date_2_string)
         counts = []
-        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+        for match in re.finditer(r'counts":\[\s*"(\d+)', response.content.decode('utf-8')):
             capture = match.group(1)
             counts.append(capture)
         self.assertContains(response, 'metric_value_1">' + counts[0])
@@ -612,7 +612,7 @@ class KPISummaryTests(TestCase):
         response = self.get_graph(kpi='each_day', debug=False)
         self.assertContains(response, '"' + date_1_string + '", "' + date_2_string + '"')
         counts = []
-        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+        for match in re.finditer(r'counts":\[\s*"(\d+)', response.content.decode('utf-8')):
             capture = match.group(1)
             counts.append(capture)
         self.assertContains(response, counts[0] + ', ' + counts[1])
@@ -631,6 +631,27 @@ class KPISummaryTests(TestCase):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
         response = self.get_graph(kpi='data_date', from_date='1-Nov', to_date='04-Nov', debug=False)
         self._assertRegex(response, r'\d+, \d+, \d+, \d+')
+
+
+    #
+    # Table / Graph common code
+    #
+
+    def test_to_date_cannot_be_greater_than_yesterday(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        from_date = date.today() - timedelta(2)
+        to_date = date.today()
+        # %d-%b 04-Nov http://strftime.org/
+        response = self.get_graph(kpi='data_date', from_date=from_date.strftime('%d-%b'), to_date=to_date.strftime('%d-%b'), debug=False)
+        self.assertContains(response, 'To date cannot be greater than yesterday')
+
+    def test_from_date_cannot_be_greater_than_to_date(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        from_date = date.today() - timedelta(2)
+        to_date = date.today() - timedelta(4)
+        # %d-%b 04-Nov http://strftime.org/
+        response = self.get_graph(kpi='data_date', from_date=from_date.strftime('%d-%b'), to_date=to_date.strftime('%d-%b'), debug=False)
+        self.assertContains(response, 'From date cannot be greater than to date')
 
     #
     # endpoint create/edit
@@ -755,7 +776,7 @@ class KPISummaryTests(TestCase):
         response = self.get_graph(kpi='cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
         self._assertNotRegex(response, r'Metric data found in cache')
         counts = []
-        for match in re.finditer(r'counts&quot;:\[\s*&quot;(\d+)', response.content.decode('utf-8')):
+        for match in re.finditer(r'counts":\[\s*"(\d+)', response.content.decode('utf-8')):
             capture = match.group(1)
             counts.append(capture)
         response = self.get_graph(kpi='cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)

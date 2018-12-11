@@ -414,6 +414,12 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
         date_to = _kpi_date(1)
         page_heading = report_period_days + ' days ' + view_type + ' view for KPI ' + kpi
 
+    if _date_object_from_adobe_date(date_to) >= date.today():
+        return _build_error_context(kpi, page_title, 'To date cannot be greater than yesterday')
+
+    if _date_object_from_adobe_date(date_from) > _date_object_from_adobe_date(date_to):
+        return _build_error_context(kpi, page_title, 'From date cannot be greater than to date')
+
     queue_body = QUEUE_BODY_TEMPLATE.replace('{DATE_FROM}', date_from).replace('{DATE_TO}', date_to)
     queue_body = queue_body.replace('{METRIC_ID}', metric_id)
     queue_body = queue_body.replace('{REPORT_SUITE_ID}', report_suite_id)

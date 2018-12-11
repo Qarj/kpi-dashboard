@@ -121,8 +121,8 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Can put number of days in: summary/table/visits/60 is last 60 days
         - [x] Can put date range in: summary/table/visits/20-Oct/10-Nov
         - [ ] Can change report_suite_id: summary/table/visits/20-Oct/10-Nov?report_suite_id=my-id
-        - [ ] Throw error if to_date is > yesterday
-        - [ ] Throw error if from_date > to_date
+        - [x] Throw error if to_date is > yesterday
+        - [x] Throw error if from_date > to_date
         - [ ] Adobe error messages displayed (needs test)
 - [ ] Create fake Adobe endpoint
     - method=Report.Queue
