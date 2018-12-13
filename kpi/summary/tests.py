@@ -104,33 +104,9 @@ class KPISummaryTests(TestCase):
         kwargs['kpi'] = kpi
         return my_reverse('summary:edit', kwargs=kwargs)
 
-    def submit_edit(self, kpi, username='default_username', report_period_days=7, secret='default_secret',
-                    queue_url='http://localhost/kpi/summary/adobe_fake_api/?method=Report.Queue',
-                    queue_body="""
-{
-    "reportDescription":{
-        "reportSuiteID":"my-brand-id",
-        "dateFrom":"{DATE_FROM}",
-        "dateTo":"{DATE_TO}",
-        "dateGranularity":"day",
-        "metrics":[
-            {
-                "id":"visits"
-            }
-        ]
-    }
-}
-""",
-                    get_url='http://localhost/kpi/summary/adobe_fake_api/?method=Report.Get',
-                    get_body='{"reportID":3582786221}',
+    def submit_edit(self, kpi, report_period_days=7,
                     debug=False):
         body = {
-                    'username': username,
-                    'secret': secret,
-                    'queue_url': queue_url,
-                    'queue_body': queue_body,
-                    'get_url': get_url,
-                    'get_body': get_body,
                     'report_period_days': report_period_days,
         }
         return self._post_url_and_body( self._build_edit_url(kpi), body, debug=debug )
@@ -291,40 +267,6 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'KPI Name')
         self.assertContains(response, '>site_visits<')
 
-    def test_edit_page_form_has_username_field(self):
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'username')
-        self.assertContains(response, 'class="narrow-input"')
-        self.assertContains(response, 'API Username')
-
-    def test_edit_page_form_has_secret_field(self):
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'secret')
-        self.assertContains(response, 'API Secret')
-        self.assertContains(response, 'maxlength="50"')
-
-    def test_edit_page_form_has_queue_url(self):
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'queue_url')
-        self.assertContains(response, 'Queue URL')
-        self.assertContains(response, 'maxlength="200"')
-
-    def test_edit_page_form_has_queue_body(self):
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'queue_body')
-        self.assertContains(response, 'Queue Body')
-        self.assertContains(response, 'maxlength="2000"')
-
-    def test_edit_page_form_has_get_url(self):
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'get_url')
-        self.assertContains(response, 'Get URL')
-
-    def test_edit_page_form_has_get_body(self):
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'get_body')
-        self.assertContains(response, 'Get Body')
-
     def test_edit_page_form_has_report_period_days(self):
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'report_period_days')
@@ -347,51 +289,10 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'KPI config written to database ok')
 
-    def test_api_username_written_to_database(self):
-        response = self.submit_edit(kpi='site_visits', username='my_api_username', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'my_api_username')
-
     def test_api_report_period_days_written_to_database(self):
         response = self.submit_edit(kpi='site_visits', report_period_days='27', debug=False)
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, '"27"')
-
-    def test_secret_displays_empty_when_no_data(self):
-        response = self.submit_edit(kpi='site_visits', secret='', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'name="secret" value=""')
-    
-    def test_secret_displays_eight_asterix_when_has_data(self):
-        response = self.submit_edit(kpi='site_visits', secret='my_api_secret', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'name="secret" value="********"')
-
-    def test_secret_does_not_update_when_eight_asterix_submitted(self):
-        response = self.submit_edit(kpi='site_visits', secret='my_api_secret', debug=False)
-        self.assertContains(response, 'API Secret updated')
-        response = self.submit_edit(kpi='site_visits', secret='********', debug=False)
-        self.assertContains(response, 'API Secret not updated')
-
-    def test_queue_url_written_to_database(self):
-        response = self.submit_edit(kpi='site_visits', queue_url='https://api', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'name="queue_url" value="https://api"')
-
-    def test_queue_body_written_to_database(self):
-        response = self.submit_edit(kpi='site_visits', queue_body='{ queued: true }', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, '{ queued: true }')
-
-    def test_get_url_written_to_database(self):
-        response = self.submit_edit(kpi='site_visits', get_url='https://api_get', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'name="get_url" value="https://api_get"')
-
-    def test_get_body_written_to_database(self):
-        response = self.submit_edit(kpi='site_visits', get_body='{ report_id: 42 }', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, '{ report_id: 42 }')
 
     def test_date_created_visible_on_subsequent_form_get(self):
         response = self.submit_edit(kpi='created', debug=False)
@@ -724,7 +625,6 @@ class KPISummaryTests(TestCase):
 
     def test_endpoint_api_username_written_to_database(self):
         response = self.submit_endpoint(type='test', username='my_api_username', debug=False)
-        response = self.get_edit(kpi='site_visits', debug=False)
         response = self.get_endpoint(type='test', debug=False)
         self.assertContains(response, 'my_api_username')
 

@@ -14,54 +14,6 @@
             </tr>
             <tr>
                 <th>
-                    <label for="id_username">API Username</label>
-                </th>
-                <td>
-                    <input type="text" class="narrow-input" required name="username" value="{{ current_username }}" id="id_username" maxlength="50" />
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <label for="id_secret">API Secret</label>
-                </th>
-                <td>
-                    <input type="text" class="narrow-input" required name="secret" value="{{ current_secret }}" id="id_secret" maxlength="50" />
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <label for="id_queue_url">Queue URL</label>
-                </th>
-                <td>
-                    <input type="url" class="wide-input" required name="queue_url" value="{{ current_queue_url }}" id="id_queue_url" maxlength="200" />
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <label for="id_queue_body">Queue Body</label>
-                </th>
-                <td>
-                    <textarea name="queue_body" id="id_queue_body" required maxlength="2000" cols="100" rows="15" >{{ current_queue_body }}</textarea>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <label for="id_get_url">Get URL</label>
-                </th>
-                <td>
-                    <input type="url" class="wide-input" required name="get_url" value="{{ current_get_url }}" id="id_get_url" maxlength="200" />
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <label for="id_get_body">Get Body</label>
-                </th>
-                <td>
-                    <textarea name="get_body" id="id_get_body" required maxlength="2000" cols="100" rows="5" >{{ current_get_body }}</textarea>
-                </td>
-            </tr>
-            <tr>
-                <th>
                     <label for="id_report_period_days">Report Period Days</label>
                 </th>
                 <td>
@@ -90,37 +42,5 @@
             </tr>
         </table>
     </form>
-
-    <div class="row">
-        <div class="column">
-            <h4>Example Queue request</h4>
-
-            <textarea readonly class="steps" cols="68" rows="15">
-
-{
-    "reportDescription":{
-        "reportSuiteID":"my-brand-id",
-        "dateFrom":"{DATE_FROM}",
-        "dateTo":"{DATE_TO}",
-        "dateGranularity":"day",
-        "metrics":[
-            {
-                "id":"visits"
-            }
-        ]
-    }
-}
-            </textarea>
-        </div>
-
-        <div class="column">
-            <h4>Example Get request</h4>
-
-            <textarea readonly class="steps" cols="68" rows="15">
-
-{"reportID":{REPORT_ID}}
-            </textarea>
-        </div>
-    </div>
 
 {% endblock %}

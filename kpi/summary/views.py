@@ -229,10 +229,6 @@ def edit(request, kpi):
     if request.method == 'POST':
         return _process_edit_submit(request, dash)
 
-    secret_display = ''
-    if dash.secret:
-        secret_display = '********'
-
     form = EditForm()
     page_title = 'Edit ' + kpi
     page_heading = 'Create / Edit KPI Dashboard'
@@ -242,12 +238,6 @@ def edit(request, kpi):
         'kpi_name': kpi,
         'page_title': page_title,
         'page_heading': page_heading,
-        'current_username': dash.username,
-        'current_secret': secret_display,
-        'current_queue_url': dash.queue_url,
-        'current_queue_body': dash.queue_body,
-        'current_get_url': dash.get_url,
-        'current_get_body': dash.get_body,
         'current_date_created': dash.date_created,
         'current_date_modified': dash.date_modified,
         'current_report_period_days': dash.report_period_days,
@@ -258,29 +248,12 @@ def edit(request, kpi):
 
 def _process_edit_submit(request, dash):
 
-    dash.username = request.POST.get('username', None)
-    dash.queue_url = request.POST.get('queue_url', None)
-    dash.queue_body = request.POST.get('queue_body', None)
-    dash.get_url = request.POST.get('get_url', None)
-    dash.get_body = request.POST.get('get_body', None)
     dash.report_period_days = request.POST.get('report_period_days', None)
-
-    submitted_secret = request.POST.get('secret', None)
-    if submitted_secret == '********':
-        secret_message = 'API Secret not updated'
-    else:
-        dash.secret = submitted_secret
-        secret_message = 'API Secret updated'
 
     dash.save()
 
-#    print ('Username:', username)
-#    print ('Secret:', secret)
-#    print ('Queue URL:', queue_url)
-#    print ('kpi:', kpi)
-
-    page_title = 'xyz' + dash.kpi_name
-    page_heading = 'abcd ' + dash.username
+    page_title = dash.kpi_name
+    page_heading = dash.kpi_name
     error = ''
 
     context = {
@@ -288,7 +261,6 @@ def _process_edit_submit(request, dash):
         'page_heading': page_heading,
         'error': error,
         'result_status_message': 'KPI config written to database ok',
-        'secret_message': secret_message,
     }
 
     http_status = 200

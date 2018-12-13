@@ -93,10 +93,10 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Add default_report_suite_id
         - [x] Endpoint has its own model separate to the one used by edit (Dash)
     - [ ] Refactor Edit
-        - [ ] Remove Report.Queue
-        - [ ] Remove Report.Get
-        - [ ] Remove API Username
-        - [ ] Remove API Secret
+        - [x] Remove Report.Queue
+        - [x] Remove Report.Get
+        - [x] Remove API Username
+        - [x] Remove API Secret
         - [ ] Add default_report_suite_id
         - [ ] Add default_report_period_days
         - [ ] Add metric_id
