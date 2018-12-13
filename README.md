@@ -38,7 +38,7 @@ http://localhost/kpi/summary/edit/site_visits/
 Deploy the following project to satisfy Apache configuration dependencies:
 - https://github.com/Qarj/test-results-dashboard
 
-Create a folder for webimblaze-server and clone the project:
+Create a folder for kpi-dashboard and clone the project:
 ```
 cd /var/www
 sudo mkdir kpi
@@ -77,13 +77,52 @@ sudo systemctl restart apache2
 
 Verify with url: http://localhost/kpi/summary/endpoint/test/
 
+# Windows deployment
+
+Deploy the following project to satisfy Apache configuration dependencies:
+- https://github.com/Qarj/test-results-dashboard
+
+Create a folder for kpi-dashboard and clone the project:
+```
+mkdir c:\git
+cd /D c:/git
+git clone https://github.com/Qarj/kpi-dashboard
+```
+
+Install needed packages
+```
+pip install python-dateutil
+```
+
+Restart Apache
+```
+\Apache24\bin\httpd -k restart
+```
+
+Create the database
+```
+cd /git/kpi-dashboard/kpi
+python manage.py makemigrations
+python manage.py migrate
+```
+
+Verify with url: http://localhost/kpi/summary/endpoint/test/
+
+Check the error logs
+```
+type C:\Apache24\logs\error.log
+```
+
+Note that in `C:\Apache24\conf\httpd.conf` you can change `LogLevel warn` to `LogLevel debug` for
+additional log info.
+
+
 ### Debugging
 
 ```
 sudo cat /etc/apache2/envvars
 sudo cat /var/log/apache2/error.log
 ```
-
 
 
 # Fake Adobe API

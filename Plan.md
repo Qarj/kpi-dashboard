@@ -169,15 +169,15 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
     - [x] If full request needed, update Cache afterwards
     - [ ] Delete cache metric id
     - [ ] Delete catch entirely
-    - [ ] Cache can be poisoned by requesting metrics for current day, throw error if to_date is after yesterday
+    - [x] Cache can be poisoned by requesting metrics for current day, throw error if to_date is after yesterday
     - [ ] Does one DB call make more sense than many?
     - [ ] Cache should not be updated if cache_hit
-- [ ] Deployment
+- [x] Deployment
     - [x] mod-wsgi fix for Django
 	- [x] Linux config added to test-results-dashboard
     - [x] Fix: `ALLOWED_HOSTS = ['*']`
 	- [x] Deployment instructions for Linux
-	- [ ] Deployment instructions for Windows
+	- [x] Deployment instructions for Windows
 - [ ] Canary
     - [ ] Fake endpoint responds to POST Report.Queue
     - [ ] Fake endpoint responds to POST Report.Get
