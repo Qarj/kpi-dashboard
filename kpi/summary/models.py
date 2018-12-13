@@ -18,11 +18,6 @@ class Endpoint(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
-class KPI(models.Model):
-    date = models.DateTimeField(auto_now_add=True)
-    value = models.FloatField()
-    date_modified = models.DateTimeField(auto_now=True)
-
 class Queue(models.Model):
     report_id = models.CharField(max_length=20)
     date_from = models.DateTimeField()
