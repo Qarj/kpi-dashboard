@@ -1,7 +1,10 @@
 from django import forms
 
 class EditForm(forms.Form):
-    report_period_days = forms.CharField(widget=forms.TextInput)
+    metric_id = forms.CharField(widget=forms.TextInput)
+    metric_desc = forms.CharField(widget=forms.TextInput)
+    default_report_suite_id = forms.CharField(widget=forms.TextInput)
+    default_report_period_days = forms.CharField(widget=forms.TextInput)
 
 class EndpointForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput)

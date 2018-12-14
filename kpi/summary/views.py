@@ -238,9 +238,12 @@ def edit(request, kpi):
         'kpi_name': kpi,
         'page_title': page_title,
         'page_heading': page_heading,
+        'current_metric_id': dash.metric_id,
+        'current_metric_desc': dash.metric_desc,
+        'current_default_report_suite_id': dash.default_report_suite_id,
+        'current_default_report_period_days': dash.default_report_period_days,
         'current_date_created': dash.date_created,
         'current_date_modified': dash.date_modified,
-        'current_report_period_days': dash.report_period_days,
     }
 
     return render(request, 'summary/edit.html', context)
@@ -248,7 +251,10 @@ def edit(request, kpi):
 
 def _process_edit_submit(request, dash):
 
-    dash.report_period_days = request.POST.get('report_period_days', None)
+    dash.metric_id = request.POST.get('metric_id', None)
+    dash.metric_desc = request.POST.get('metric_desc', None)
+    dash.default_report_suite_id = request.POST.get('default_report_suite_id', None)
+    dash.default_report_period_days = request.POST.get('default_report_period_days', None)
 
     dash.save()
 

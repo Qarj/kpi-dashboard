@@ -97,9 +97,9 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Remove Report.Get
         - [x] Remove API Username
         - [x] Remove API Secret
-        - [ ] Add default_report_suite_id
-        - [ ] Add default_report_period_days
-        - [ ] Add metric_id
+        - [x] Add default_report_suite_id
+        - [x] Add default_report_period_days
+        - [x] Add metric_id
         - [ ] table/graph will first check see if kpi_name exists
             - [ ] If so, use details from it
             - [ ] If not, use default details from endpoint, assuming that kpi_name == metric_id

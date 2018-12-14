@@ -104,10 +104,13 @@ class KPISummaryTests(TestCase):
         kwargs['kpi'] = kpi
         return my_reverse('summary:edit', kwargs=kwargs)
 
-    def submit_edit(self, kpi, report_period_days=7,
+    def submit_edit(self, kpi, metric_id='default_id', metric_desc='Default Desc', default_report_suite_id='default-suite', default_report_period_days=7,
                     debug=False):
         body = {
-                    'report_period_days': report_period_days,
+                    'metric_id': metric_id,
+                    'metric_desc': metric_desc,
+                    'default_report_suite_id': default_report_suite_id,
+                    'default_report_period_days': default_report_period_days,
         }
         return self._post_url_and_body( self._build_edit_url(kpi), body, debug=debug )
 
@@ -267,11 +270,26 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'KPI Name')
         self.assertContains(response, '>site_visits<')
 
-    def test_edit_page_form_has_report_period_days(self):
+    def test_edit_page_form_has_default_report_period_days(self):
         response = self.get_edit(kpi='site_visits', debug=False)
-        self.assertContains(response, 'report_period_days')
-        self.assertContains(response, 'Report Period Days')
-        self.assertContains(response, 'type="number" min="1" max="31"')
+        self.assertContains(response, 'default_report_period_days')
+        self.assertContains(response, 'Default Report Period Days')
+        self.assertContains(response, 'type="number" min="1" max="366"')
+
+    def test_edit_page_form_has_default_report_suite_id(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'default_report_suite_id')
+        self.assertContains(response, 'Default Report Suite Id')
+
+    def test_edit_page_form_has_metric_id(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'metric_id')
+        self.assertContains(response, 'Metric Id')
+
+    def test_edit_page_form_has_metric_desc(self):
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, 'metric_desc')
+        self.assertContains(response, 'Metric Description')
 
     def test_edit_page_form_has_blank_date_created(self):
         response = self.get_edit(kpi='site_visits', debug=False)
@@ -289,10 +307,25 @@ class KPISummaryTests(TestCase):
         response = self.submit_edit(kpi='site_visits', debug=False)
         self.assertContains(response, 'KPI config written to database ok')
 
-    def test_api_report_period_days_written_to_database(self):
-        response = self.submit_edit(kpi='site_visits', report_period_days='27', debug=False)
+    def test_default_report_period_days_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', default_report_period_days='27', debug=False)
         response = self.get_edit(kpi='site_visits', debug=False)
         self.assertContains(response, '"27"')
+
+    def test_default_report_suite_id_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', default_report_suite_id='my-report-suite', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, '"my-report-suite"')
+
+    def test_metric_id_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', metric_id='my_metric', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, '"my_metric"')
+
+    def test_metric_desc_written_to_database(self):
+        response = self.submit_edit(kpi='site_visits', metric_desc='My Metric Desc', debug=False)
+        response = self.get_edit(kpi='site_visits', debug=False)
+        self.assertContains(response, '"My Metric Desc"')
 
     def test_date_created_visible_on_subsequent_form_get(self):
         response = self.submit_edit(kpi='created', debug=False)
