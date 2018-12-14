@@ -103,6 +103,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [ ] table/graph will first check see if kpi_name exists
             - [ ] If so, use details from it
             - [ ] If not, use default details from endpoint, assuming that kpi_name == metric_id
+            - [ ] metric conversion not working?
     - [ ] Refactor Table/Graph to use new paradigm
     	- [x] Hard code to Report.Queue body
     	- [x] Add query string endpoint=test to all test calls to Table/Graph

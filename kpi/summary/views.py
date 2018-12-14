@@ -376,14 +376,25 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
     except Endpoint.DoesNotExist:
         return _build_error_context(kpi, page_title, 'Endpoint ' + endpoint_type + ' has not been defined')
 
+    dashboard_status, dash_report_period_days, dash_report_suite_id, kpi_label = _get_dashboard_definition(kpi)
+
     endpoint_type = request.GET.get('endpoint', 'prod')
     debug = request.GET.get('debug', None)
     report_suite_id = request.GET.get('report_suite_id', None)
 
     if report_period_days is None:
+        report_period_days = dash_report_period_days
+    if report_period_days is None:
         report_period_days = str(endpoint.default_report_period_days)
+
+    if report_suite_id is None:
+        report_suite_id = dash_report_suite_id
     if report_suite_id is None:
         report_suite_id = endpoint.default_report_suite_id
+
+    if kpi_label is None:
+        kpi_label = kpi
+
     metric_id = kpi
 
     if url_from_date is not None:
@@ -478,12 +489,25 @@ def _get_data_for_kpi(request, kpi, view_type, report_period_days, url_from_date
         'content_header': content_header,
         'queue_response_body': queue_response_body,
         'get_response_body': get_response_body,
+        'dashboard_status': dashboard_status,
         'metrics': metrics,
         'graph_values': graph_values,
         'graph_dates': graph_dates,
+        'kpi_label': kpi_label,
     }
 
     return context
+
+def _get_dashboard_definition(kpi):
+    try:
+        dash = Dash.objects.get(kpi_name=kpi)
+    except Dash.DoesNotExist:
+        return 'No dashboard with name ' + kpi + ' found, assuming it is a metric_id', None, None, None
+
+    return 'Dashboard ' + kpi + ' found, with metric_id ' + dash.metric_id + ' my_metric_id', \
+        str(dash.default_report_period_days), \
+        dash.default_report_suite_id, \
+        dash.metric_desc
 
 def _get_metrics_from_cache(metric_id, report_suite_id, date_from, date_to, endpoint_type):
 

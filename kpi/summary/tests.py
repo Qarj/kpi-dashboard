@@ -67,10 +67,10 @@ class KPISummaryTests(TestCase):
     # test helpers
     #
 
-    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test', report_suite_id='default-report-suite'):
+    def get_graph(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test', report_suite_id=None):
         return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:graph', endpoint, report_period_days, from_date, to_date, report_suite_id), debug)
 
-    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test', report_suite_id='default-report-suite'):
+    def get_table(self, debug=False, kpi='unknown', page_debug='true', report_period_days=None, from_date=None, to_date=None, endpoint='test', report_suite_id=None):
         return self._get_url( self._build_metric_display_url(kpi, page_debug, 'summary:table', endpoint, report_period_days, from_date, to_date, report_suite_id), debug )
 
     def _build_metric_display_url(self, kpi, page_debug, target_view, endpoint, report_period_days, from_date, to_date, report_suite_id):
@@ -85,7 +85,8 @@ class KPISummaryTests(TestCase):
         query_kwargs={}
         query_kwargs['debug'] =  page_debug
         query_kwargs['endpoint'] =  endpoint
-        query_kwargs['report_suite_id'] =  report_suite_id
+        if report_suite_id is not None:
+            query_kwargs['report_suite_id'] =  report_suite_id
         return my_reverse(target_view, kwargs=kwargs, query_kwargs=query_kwargs)
 
     def get_edit(self, debug=False, kpi='unknown'):
@@ -594,6 +595,19 @@ class KPISummaryTests(TestCase):
         response = self.get_table(kpi='data_date', from_date='1-Nov', to_date='04-Nov', report_suite_id='my-cool-id', debug=False)
         self.assertContains(response, 'reportSuiteID":"my-cool-id')
 
+    def test_debug_view_indicates_dashboard_not_defined(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.get_table(kpi='not_defined_dashboard', from_date='1-Nov', to_date='04-Nov', report_suite_id='my-cool-id', debug=False)
+        self.assertContains(response, 'No dashboard with name not_defined_dashboard found, assuming it is a metric_id')
+
+    def test_debug_view_indicates_dashboard_defined_and_used(self):
+        response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
+        response = self.submit_edit(kpi='defined_dashboard_id', metric_id='my_metric_id', metric_desc='Special Desc', default_report_period_days='4', default_report_suite_id='special-suite-id', debug=False)
+        response = self.get_graph(kpi='defined_dashboard_id', debug=False)
+        self.assertContains(response, 'Dashboard defined_dashboard_id found, with metric_id my_metric_id')
+        self._assertRegex(response, r'\d+, \d+, \d+, \d+')
+        self.assertContains(response, '"reportSuiteID":"special-suite-id"')
+        self._assertRegex(response, 'label: .Special Desc')
 
     #
     # endpoint create/edit
