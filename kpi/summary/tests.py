@@ -522,7 +522,7 @@ class KPISummaryTests(TestCase):
 
     def test_table_can_specify_from_date_and_to_date_in_url(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
-        response = self.get_table(kpi='data_date', from_date='1-Nov', to_date='04-Nov', debug=False)
+        response = self.get_table(kpi='data_date', from_date='1-Nov-2018', to_date='04-Nov-2018', debug=False)
         self.assertContains(response, 'metric_value_4')
 
 
@@ -566,7 +566,7 @@ class KPISummaryTests(TestCase):
 
     def test_graph_can_specify_from_date_and_to_date_in_url(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
-        response = self.get_graph(kpi='data_date', from_date='1-Nov', to_date='04-Nov', debug=False)
+        response = self.get_graph(kpi='data_date', from_date='1-Nov-2018', to_date='04-Nov-2018', debug=False)
         self._assertRegex(response, r'\d+, \d+, \d+, \d+')
 
 
@@ -592,12 +592,12 @@ class KPISummaryTests(TestCase):
 
     def test_can_specify_report_suite_id_in_query_string(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
-        response = self.get_table(kpi='data_date', from_date='1-Nov', to_date='04-Nov', report_suite_id='my-cool-id', debug=False)
+        response = self.get_table(kpi='data_date', from_date='1-Nov-2018', to_date='04-Nov-2018', report_suite_id='my-cool-id', debug=False)
         self.assertContains(response, 'reportSuiteID":"my-cool-id')
 
     def test_debug_view_indicates_dashboard_not_defined(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
-        response = self.get_table(kpi='not_defined_dashboard', from_date='1-Nov', to_date='04-Nov', report_suite_id='my-cool-id', debug=False)
+        response = self.get_table(kpi='not_defined_dashboard', from_date='1-Nov-2018', to_date='04-Nov-2018', report_suite_id='my-cool-id', debug=False)
         self.assertContains(response, 'No dashboard with name not_defined_dashboard found, assuming it is a metric_id')
 
     def test_debug_view_indicates_dashboard_defined_and_used(self):
@@ -728,21 +728,21 @@ class KPISummaryTests(TestCase):
 
     def test_production_metric_data_is_cached(self):
         response = self.submit_endpoint(type='prod', default_report_period_days='2', debug=False)
-        response = self.get_graph(kpi='cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
+        response = self.get_graph(kpi='cache', from_date='1-Nov-2018', to_date='04-Nov-2018', endpoint='prod', debug=False)
         self._assertNotRegex(response, r'Metric data found in cache')
         counts = []
         for match in re.finditer(r'counts":\[\s*"(\d+)', response.content.decode('utf-8')):
             capture = match.group(1)
             counts.append(capture)
-        response = self.get_graph(kpi='cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
+        response = self.get_graph(kpi='cache', from_date='1-Nov-2018', to_date='04-Nov-2018', endpoint='prod', debug=False)
         self._assertRegex(response, r'Metric data found in cache')
         self.assertContains(response, counts[0] + ', ' + counts[1] + ', ' + counts[2] + ', ' + counts[3])
 
     def test_test_metric_data_is_not_cached(self):
         response = self.submit_endpoint(type='test', default_report_period_days='2', debug=False)
-        response = self.get_graph(kpi='not_cache', from_date='1-Nov', to_date='04-Nov', endpoint='prod', debug=False)
+        response = self.get_graph(kpi='not_cache', from_date='1-Nov-2018', to_date='04-Nov-2018', endpoint='prod', debug=False)
         self._assertNotRegex(response, r'Metric data found in cache')
-        response = self.get_graph(kpi='not_cache', from_date='1-Nov', to_date='04-Nov', endpoint='test', debug=False)
+        response = self.get_graph(kpi='not_cache', from_date='1-Nov-2018', to_date='04-Nov-2018', endpoint='test', debug=False)
         self._assertNotRegex(response, r'Metric data found in cache')
 
 
