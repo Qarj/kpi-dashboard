@@ -21,6 +21,9 @@ http://localhost/kpi/summary/table/visits/1-Nov-2017/20-Nov-2018
 ### Override the endpoint (default is prod)
 http://localhost/kpi/summary/table/visits/?endpoint=test
 
+### Override the report-suite-id (default supplied by endpoint definition)
+http://localhost/kpi/summary/table/visits/?report_suite_id=my-brand-id
+
 ### Debug mode
 http://localhost/kpi/summary/table/visits/?debug=true
 

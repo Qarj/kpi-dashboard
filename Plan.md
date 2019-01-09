@@ -92,7 +92,7 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Rename report_period_days to default_report_period_days
         - [x] Add default_report_suite_id
         - [x] Endpoint has its own model separate to the one used by edit (Dash)
-    - [ ] Refactor Edit
+    - [x] Refactor Edit
         - [x] Remove Report.Queue
         - [x] Remove Report.Get
         - [x] Remove API Username
@@ -100,10 +100,9 @@ Goal is to slurp metrics from an Adobe Analytics KPI and show it on dashboard.
         - [x] Add default_report_suite_id
         - [x] Add default_report_period_days
         - [x] Add metric_id
-        - [ ] table/graph will first check see if kpi_name exists
-            - [ ] If so, use details from it
-            - [ ] If not, use default details from endpoint, assuming that kpi_name == metric_id
-            - [ ] metric conversion not working?
+        - [x] table/graph will first check see if kpi_name exists
+            - [x] If so, use details from it
+            - [x] If not, use default details from endpoint, assuming that kpi_name == metric_id
     - [ ] Refactor Table/Graph to use new paradigm
     	- [x] Hard code to Report.Queue body
     	- [x] Add query string endpoint=test to all test calls to Table/Graph
