@@ -607,7 +607,10 @@ class KPISummaryTests(TestCase):
         self.assertContains(response, 'Dashboard defined_dashboard_id found, with metric_id my_metric_id')
         self._assertRegex(response, r'\d+, \d+, \d+, \d+')
         self.assertContains(response, '"reportSuiteID":"special-suite-id"')
+        self.assertContains(response, '"id":"my_metric_id"')
         self._assertRegex(response, 'label: .Special Desc')
+
+    
 
     #
     # endpoint create/edit
