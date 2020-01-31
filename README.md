@@ -17,6 +17,7 @@ http://localhost/kpi/summary/endpoint/test/
 For the test endpoint, to use the fake adobe endpoint set these values:
 
 Queue URL `http://localhost/kpi/summary/adobe_fake_api/?method=Report.Queue`
+
 Get URL `http://localhost/kpi/summary/adobe_fake_api/?method=Report.Get`
 
 
