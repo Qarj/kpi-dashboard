@@ -4,13 +4,45 @@ Display KPIs on a dashboard using Adobe Analytics API 1.4
 KPI documentation: https://github.com/AdobeDocs/analytics-1.4-apis
 
 ## Dashboard Home
+
 http://localhost/kpi/summary/
+
 
 ## Create / Edit endpoint
 
 http://localhost/kpi/summary/endpoint/prod/
 
 http://localhost/kpi/summary/endpoint/test/
+
+For the test endpoint, to use the fake adobe endpoint set these values:
+
+Queue URL `http://localhost/kpi/summary/adobe_fake_api/?method=Report.Queue`
+Get URL `http://localhost/kpi/summary/adobe_fake_api/?method=Report.Get`
+
+
+## Create / Edit KPI
+
+http://localhost/kpi/summary/edit/< KPI NAME >/
+
+http://localhost/kpi/summary/edit/site_visits/
+
+Create at least one KPI. 
+
+For example, if using the fake adobe endpoint, navigate to http://localhost/kpi/summary/edit/site_visits/
+then fill out these values:
+
+Metric Id: `visits`
+
+Metric Description: `Visits KPI`
+
+Default Report Suite Id: `test`
+
+Default Report Period Days: `12`
+
+Test it with http://localhost/kpi/summary/table/visits/?endpoint=test
+
+Every time you refresh you'll get different values since the fake endpoint just returns random numbers.
+
 
 ## Table view
 
@@ -22,24 +54,26 @@ http://localhost/kpi/summary/table/visits/1-Nov/20-Nov
 
 http://localhost/kpi/summary/table/visits/1-Nov-2017/20-Nov-2018
 
+
 ### Override the endpoint (default is prod)
+
 http://localhost/kpi/summary/table/visits/?endpoint=test
 
+
 ### Override the report-suite-id (default supplied by endpoint definition)
+
 http://localhost/kpi/summary/table/visits/?report_suite_id=my-brand-id
 
+
 ### Debug mode
+
 http://localhost/kpi/summary/table/visits/?debug=true
+
 
 ## Graph view
 
 Same urls as table view, except s/table/graph/
 
-## Create / Edit kpi
-
-http://localhost/kpi/summary/edit/< KPI NAME >/
-
-http://localhost/kpi/summary/edit/site_visits/
 
 # Linux Deployment
 
