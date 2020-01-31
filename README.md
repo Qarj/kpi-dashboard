@@ -122,6 +122,15 @@ additional log info.
 
 ### Debugging
 
+Might need to reinstall six
+
+```
+pip uninstall six
+pip install six
+```
+
+Error log locations
+
 ```
 sudo cat /etc/apache2/envvars
 sudo cat /var/log/apache2/error.log
